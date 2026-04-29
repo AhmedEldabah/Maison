@@ -2856,7 +2856,8 @@ function createFabricTexture(colorHex) {
   ctx.fillRect(0, 0, size, size);
   const id = ctx.getImageData(0, 0, size, size);
   const d = id.data;
-  // Deterministic PRNG seeded by color so same product always has same texture
+  // Deterministic PRNG seeded by color — Numerical Recipes LCG constants
+  // ensures same product always gets the same fabric pattern
   let seed = r * 113 + g * 67 + b * 41 + 1;
   function rand() {
     seed = (seed * 1664525 + 1013904223) & 0xffffffff;
@@ -2894,8 +2895,11 @@ function initProductShirts() {
   if (productShirtSystem) { refreshProductShirts(); return; }
 
   const W = 240, H = 300;
+  // preserveDrawingBuffer is required so drawImage can copy from the WebGL canvas
+  // synchronously after each render call (WebGL may otherwise discard the buffer)
   const offRenderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, preserveDrawingBuffer: true });
   offRenderer.setSize(W, H);
+  // Cap at 1.5× — balances sharpness vs. memory/GPU cost for small product cards
   offRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   offRenderer.setClearColor(0x000000, 0);
   offRenderer.domElement.style.cssText = 'position:fixed;top:-9999px;left:-9999px;pointer-events:none;opacity:0;';
@@ -2921,10 +2925,11 @@ function initProductShirts() {
 
   productShirtSystem = { offRenderer, offScene, offCamera, shirtGeo, W, H, states: [], activeMesh: null };
 
-  // Reduce animation rate on mobile/touch devices for battery savings
+  // Reduce animation rate on mobile/touch devices for battery savings (~12fps)
+  const MOBILE_FRAME_INTERVAL_MS = 80;
   const isMobile = window.matchMedia('(hover: none)').matches;
   let lastFrameTime = 0;
-  const frameInterval = isMobile ? 80 : 0; // ~12fps on mobile, full on desktop
+  const frameInterval = isMobile ? MOBILE_FRAME_INTERVAL_MS : 0;
 
   function tick(timestamp) {
     requestAnimationFrame(tick);
@@ -2934,6 +2939,7 @@ function initProductShirts() {
     const t = timestamp * 0.001;
     const sys = productShirtSystem;
 
+    // Filter to connected, visible states — skip stale canvases from previous renders
     sys.states.forEach(state => {
       if (!state.visible || !state.canvas.isConnected) return;
 
