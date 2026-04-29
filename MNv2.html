@@ -1,0 +1,3449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MAISON NORÉ — Volume XII / A·W 26</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root {
+    --bg: #0c0b09;
+    --bg-soft: #15130f;
+    --bg-card: #18150f;
+    --ink: #f1ead9;
+    --ink-2: #d4c9b1;
+    --ink-dim: #8a7f6a;
+    --ink-faint: #4a4337;
+    --rust: #c45a32;
+    --bone: #e8dcc4;
+    --line: rgba(241, 234, 217, 0.08);
+    --line-mid: rgba(241, 234, 217, 0.14);
+    --line-strong: rgba(241, 234, 217, 0.22);
+    --serif: 'Fraunces', 'Times New Roman', serif;
+    --sans: 'Inter Tight', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* baseline */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+    --space-9: 96px;
+    --space-10: 144px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    overflow-x: hidden;
+    cursor: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  ::selection { background: var(--rust); color: var(--bone); }
+
+  img { max-width: 100%; display: block; }
+
+  button, input { font: inherit; color: inherit; }
+
+  /* Scroll progress */
+  .scroll-progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--line);
+    z-index: 1000;
+  }
+  .scroll-progress-bar {
+    height: 100%;
+    background: var(--rust);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+
+  /* ===== CURSOR ===== */
+  .cursor, .cursor-ring {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    will-change: transform;
+  }
+  .cursor {
+    width: 6px; height: 6px;
+    background: var(--ink);
+    border-radius: 50%;
+    transition: width 0.25s ease, height 0.25s ease, background 0.25s ease;
+  }
+  .cursor-ring {
+    width: 32px; height: 32px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), height 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+    z-index: 9998;
+  }
+  .cursor.expand { width: 0; height: 0; }
+  .cursor-ring.expand { width: 64px; height: 64px; border-color: var(--rust); }
+  .cursor-ring.text { width: 80px; height: 80px; border-color: var(--rust); }
+  .cursor-label {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    mix-blend-mode: difference;
+  }
+  .cursor-label.show { opacity: 1; }
+
+  @media (max-width: 900px), (hover: none) {
+    body { cursor: auto; }
+    .cursor, .cursor-ring, .cursor-label { display: none; }
+  }
+
+  /* ===== GRAIN ===== */
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9000;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* ===== LOADER ===== */
+  .loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 10000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: var(--space-7);
+    transition: transform 0.9s cubic-bezier(0.86, 0, 0.07, 1);
+  }
+  .loader.hidden { transform: translateY(-101%); }
+  .loader-mark {
+    font-family: var(--serif);
+    font-size: clamp(48px, 9vw, 120px);
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    overflow: hidden;
+    height: 1em;
+  }
+  .loader-mark span {
+    display: inline-block;
+    transform: translateY(105%);
+    animation: rise 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .loader-mark span:nth-child(1) { animation-delay: 0.1s; }
+  .loader-mark span:nth-child(2) { animation-delay: 0.16s; }
+  .loader-mark span:nth-child(3) { animation-delay: 0.22s; }
+  .loader-mark span:nth-child(4) { animation-delay: 0.28s; font-style: italic; color: var(--rust); }
+  .loader-mark span:nth-child(5) { animation-delay: 0.34s; }
+  .loader-mark span:nth-child(6) { animation-delay: 0.4s; }
+  .loader-meta {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeIn 0.6s ease forwards;
+    animation-delay: 0.6s;
+  }
+  .loader-meta strong { color: var(--ink); font-weight: 400; display: block; }
+  .loader-pct {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-style: italic;
+    margin-top: var(--space-3);
+    color: var(--rust);
+  }
+  @keyframes rise { to { transform: translateY(0); } }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  /* ===== TICKER (top of page) ===== */
+  .ticker {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 90;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    height: 32px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    transition: transform 0.4s ease;
+  }
+  .ticker.hide { transform: translateY(-100%); }
+  .ticker-track {
+    display: flex;
+    gap: 64px;
+    animation: scroll 50s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .ticker-item { display: flex; align-items: center; gap: 24px; }
+  .ticker-item::after {
+    content: '';
+    width: 4px; height: 4px;
+    background: var(--rust);
+    border-radius: 50%;
+  }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed;
+    top: 32px; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px var(--space-7);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    transition: padding 0.4s ease, background 0.4s ease, border-color 0.4s ease, top 0.4s ease;
+    border-bottom: 1px solid transparent;
+  }
+  nav.scrolled {
+    background: rgba(12, 11, 9, 0.78);
+    backdrop-filter: blur(24px) saturate(120%);
+    -webkit-backdrop-filter: blur(24px) saturate(120%);
+    padding: 12px var(--space-7);
+    border-bottom-color: var(--line);
+    top: 0;
+  }
+  .ticker.hide ~ nav { top: 0; }
+  .nav-links {
+    display: flex;
+    gap: var(--space-7);
+    list-style: none;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .nav-links a {
+    color: var(--ink);
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-links a sup {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 10px;
+    color: var(--rust);
+    font-weight: 400;
+    margin-top: -8px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -4px;
+    width: 100%; height: 1px;
+    background: var(--rust);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.5s cubic-bezier(0.86, 0, 0.07, 1);
+  }
+  .nav-links a:hover { color: var(--rust); }
+  .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+  .logo {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .logo i { font-style: italic; font-weight: 300; }
+
+  .nav-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-5);
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .nav-actions button {
+    background: none;
+    border: none;
+    cursor: none;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-actions button:hover { color: var(--rust); }
+  .currency-toggle {
+    display: flex;
+    border: 1px solid var(--line-mid);
+    overflow: hidden;
+  }
+  .currency-toggle button {
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+  .currency-toggle button.active { background: var(--ink); color: var(--bg); }
+
+  .cart-btn {
+    position: relative;
+  }
+  .cart-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px; height: 16px;
+    background: var(--rust);
+    color: var(--bone);
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0;
+    padding: 0 4px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: var(--mono);
+  }
+  .cart-count.bump { transform: scale(1.45); }
+
+  .menu-toggle { display: none; }
+
+  @media (max-width: 900px) {
+    nav { padding: 14px 20px; }
+    nav.scrolled { padding: 10px 20px; }
+    .nav-links, .nav-actions > *:not(.cart-btn):not(.menu-toggle) { display: none; }
+    .menu-toggle {
+      display: inline-flex;
+      background: none; border: none;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+  }
+
+  /* ===== HERO with 3D shirt ===== */
+  .hero {
+    min-height: 100vh;
+    position: relative;
+    padding: 140px var(--space-7) var(--space-8);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+    align-items: end;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 40%, rgba(196, 90, 50, 0.10), transparent 70%),
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(232, 220, 196, 0.04), transparent 60%);
+    z-index: 0;
+  }
+  .shirt-canvas-wrap {
+    position: absolute;
+    top: 0; right: 0;
+    width: 56%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  #shirtCanvas { width: 100%; height: 100%; display: block; }
+
+  .hero-text {
+    position: relative;
+    z-index: 3;
+    grid-column: 1 / 2;
+    max-width: 620px;
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--rust);
+    text-transform: uppercase;
+    margin-bottom: var(--space-6);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    opacity: 0;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 1.4s;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--rust);
+  }
+  .hero-eyebrow .dot {
+    width: 5px; height: 5px;
+    background: var(--rust);
+    border-radius: 50%;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(60px, 11vw, 180px);
+    font-weight: 300;
+    line-height: 0.86;
+    letter-spacing: -0.045em;
+    margin-bottom: var(--space-7);
+  }
+  .hero-title .line { display: block; overflow: hidden; }
+  .hero-title .word {
+    display: inline-block;
+    transform: translateY(110%);
+    animation: rise 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .hero-title .italic {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--rust);
+  }
+  .hero-title .line:nth-child(1) .word { animation-delay: 1.5s; }
+  .hero-title .line:nth-child(2) .word { animation-delay: 1.65s; }
+  .hero-title .line:nth-child(3) .word { animation-delay: 1.8s; }
+
+  .hero-meta {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-7);
+    align-items: end;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 2.2s;
+  }
+  .hero-desc {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.65;
+    max-width: 360px;
+  }
+  .hero-desc::first-letter {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-style: italic;
+    float: left;
+    line-height: 0.9;
+    margin: 4px 8px 0 0;
+    color: var(--rust);
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 18px 28px;
+    background: var(--ink);
+    color: var(--bg);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border: none;
+    cursor: none;
+    transition: background 0.4s ease, color 0.4s ease, padding 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-cta:hover { background: var(--rust); color: var(--bone); padding-right: 36px; }
+  .hero-cta-arrow {
+    transition: transform 0.4s ease;
+    font-family: var(--mono);
+  }
+  .hero-cta:hover .hero-cta-arrow { transform: translateX(6px); }
+
+  /* hero side meta */
+  .hero-side {
+    position: absolute;
+    bottom: var(--space-7);
+    right: var(--space-7);
+    z-index: 4;
+    display: flex;
+    gap: var(--space-7);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    opacity: 0;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 2.4s;
+  }
+  .hero-side div strong {
+    display: block;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    margin-bottom: 4px;
+  }
+  .hero-side div strong em { font-style: italic; color: var(--rust); }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: var(--space-7);
+    left: var(--space-7);
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    opacity: 0;
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 2.6s;
+  }
+  .scroll-hint-line {
+    width: 30px; height: 1px;
+    background: var(--ink-dim);
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-hint-line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--rust);
+    transform: translateX(-100%);
+    animation: scrollLine 2.4s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0% { transform: translateX(-100%); }
+    50%, 100% { transform: translateX(100%); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 120px 20px 100px; }
+    .shirt-canvas-wrap { width: 100%; opacity: 0.45; }
+    .hero-side { display: none; }
+    .scroll-hint { left: 20px; bottom: 20px; }
+    .hero-meta { grid-template-columns: 1fr; gap: var(--space-5); }
+  }
+
+  /* ===== SECTION SCAFFOLD ===== */
+  section { position: relative; }
+  .container { padding: 0 var(--space-7); }
+  @media (max-width: 900px) { .container { padding: 0 20px; } }
+
+  .section-head {
+    padding: var(--space-9) 0 var(--space-7);
+    display: grid;
+    grid-template-columns: 5fr 1fr 6fr;
+    gap: var(--space-7);
+    align-items: end;
+    border-top: 1px solid var(--line);
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    color: var(--rust);
+    text-transform: uppercase;
+    margin-bottom: var(--space-4);
+    display: block;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(36px, 6.5vw, 88px);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+  }
+  .section-title em {
+    font-style: italic;
+    color: var(--ink-dim);
+    font-weight: 300;
+  }
+  .section-title em.accent { color: var(--rust); }
+  .section-aside {
+    text-align: right;
+    align-self: end;
+  }
+  .section-aside .label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: var(--space-2);
+  }
+  .section-aside .value {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink);
+  }
+  .section-desc {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.7;
+    max-width: 460px;
+  }
+
+  @media (max-width: 900px) {
+    .section-head { grid-template-columns: 1fr; gap: var(--space-5); padding: var(--space-8) 0 var(--space-6); }
+    .section-aside { text-align: left; }
+  }
+
+  /* ===== PRODUCTS ===== */
+  .shop-controls {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-5) 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .filter-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .filter-pill {
+    background: none;
+    border: 1px solid var(--line-mid);
+    color: var(--ink);
+    padding: 9px 18px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .filter-pill .n {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-dim);
+    transition: color 0.3s ease;
+  }
+  .filter-pill:hover { border-color: var(--ink); }
+  .filter-pill.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .filter-pill.active .n { color: var(--ink-faint); }
+
+  .filter-count {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-dim);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .filter-count em {
+    font-style: normal;
+    color: var(--ink);
+  }
+
+  .sort {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  .sort select {
+    background: none;
+    border: none;
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: none;
+    border-bottom: 1px solid var(--line-mid);
+    padding: 4px 16px 4px 4px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='6' viewBox='0 0 8 6'><path d='M0 0 L8 0 L4 6 Z' fill='%238a7f6a'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+  }
+  .sort select option { background: var(--bg); color: var(--ink); }
+
+  @media (max-width: 900px) {
+    .shop-controls { grid-template-columns: 1fr; gap: var(--space-3); }
+    .sort { justify-content: flex-start; }
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-left: 1px solid var(--line);
+  }
+  .product {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: var(--space-5) var(--space-5) var(--space-6);
+    position: relative;
+    cursor: none;
+    transition: background 0.5s ease;
+    overflow: hidden;
+  }
+  .product:hover { background: var(--bg-soft); }
+
+  .product-image {
+    aspect-ratio: 4/5;
+    margin-bottom: var(--space-5);
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-card);
+  }
+  .product-image-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
+  }
+  .product:hover .product-image-bg { transform: scale(1.04); }
+
+  .product-tags {
+    position: absolute;
+    top: var(--space-3); left: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 2;
+  }
+  .product-tag {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 4px 8px;
+    align-self: flex-start;
+  }
+  .product-tag.new { background: var(--rust); color: var(--bone); }
+  .product-tag.sale { background: var(--bone); color: var(--bg); }
+  .product-tag.last { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); }
+
+  .product-fav {
+    position: absolute;
+    top: var(--space-3); right: var(--space-3);
+    width: 28px; height: 28px;
+    background: rgba(12, 11, 9, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--line-mid);
+    color: var(--ink);
+    cursor: none;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+  }
+  .product-fav:hover { background: var(--ink); color: var(--bg); }
+  .product-fav.active { background: var(--rust); color: var(--bone); border-color: var(--rust); }
+  .product-fav svg { width: 12px; height: 12px; }
+
+  .product-quick {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 13px;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 500;
+    transform: translateY(101%);
+    transition: transform 0.5s cubic-bezier(0.86, 0, 0.07, 1), background 0.3s ease;
+    border: none;
+    width: 100%;
+    cursor: none;
+  }
+  .product:hover .product-quick { transform: translateY(0); }
+  .product-quick:hover { background: var(--rust); color: var(--bone); }
+
+  .product-meta {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-4);
+    align-items: start;
+  }
+  .product-cat {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .product-cat .ref {
+    color: var(--ink-faint);
+  }
+  .product-name {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .product-name em { font-style: italic; }
+  .product-fabric {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-bottom: var(--space-3);
+  }
+  .product-price {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-style: italic;
+    font-weight: 300;
+    white-space: nowrap;
+  }
+  .product-price-old {
+    font-size: 13px;
+    color: var(--ink-dim);
+    text-decoration: line-through;
+    margin-right: 6px;
+    font-style: normal;
+  }
+
+  .product-colors {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .color-swatch {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    cursor: none;
+    transition: transform 0.3s ease;
+  }
+  .color-swatch:hover { transform: scale(1.3); }
+  .color-count {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-dim);
+    margin-left: 4px;
+  }
+
+  @media (max-width: 900px) {
+    .product-grid { grid-template-columns: repeat(2, 1fr); }
+    .product { padding: var(--space-3) var(--space-3) var(--space-4); }
+    .product-name { font-size: 15px; }
+    .product-price { font-size: 14px; }
+    .product-quick { transform: translateY(0); padding: 10px; font-size: 9px; }
+  }
+
+  /* ===== EDITORIAL ===== */
+  .editorial {
+    padding: var(--space-9) 0 var(--space-9);
+    background: var(--bg-soft);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-top: var(--space-8);
+  }
+  .editorial-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+  .edit-card {
+    position: relative;
+    overflow: hidden;
+    cursor: none;
+  }
+  .edit-card:nth-child(1) { grid-column: 1 / 6; aspect-ratio: 3/4; }
+  .edit-card:nth-child(2) { grid-column: 7 / 13; aspect-ratio: 4/3; margin-top: 80px; }
+  .edit-card:nth-child(3) { grid-column: 2 / 7; aspect-ratio: 3/4; margin-top: -50px; }
+  .edit-card:nth-child(4) { grid-column: 8 / 12; aspect-ratio: 1/1; margin-top: 60px; }
+
+  .edit-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .edit-card:hover .edit-bg { transform: scale(1.06); }
+  .edit-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(12,11,9,0.85) 0%, rgba(12,11,9,0.1) 50%, rgba(12,11,9,0) 100%);
+    z-index: 1;
+  }
+  .edit-meta {
+    position: absolute;
+    top: var(--space-5);
+    left: var(--space-5);
+    z-index: 2;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    display: flex;
+    gap: var(--space-3);
+  }
+  .edit-meta .frame { color: var(--rust); }
+  .edit-content {
+    position: absolute;
+    bottom: var(--space-5);
+    left: var(--space-5);
+    right: var(--space-5);
+    z-index: 2;
+  }
+  .edit-title {
+    font-family: var(--serif);
+    font-size: clamp(24px, 3.2vw, 38px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .edit-title em { font-style: italic; color: var(--bone); }
+  .edit-loc {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  @media (max-width: 900px) {
+    .editorial-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+    .edit-card:nth-child(n) { grid-column: 1; margin-top: 0; aspect-ratio: 4/5; }
+  }
+
+  /* ===== ATELIER / MAKERS SECTION ===== */
+  .atelier {
+    padding: var(--space-10) 0;
+  }
+  .atelier-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-9);
+    align-items: start;
+  }
+  .atelier-list {
+    list-style: none;
+  }
+  .atelier-item {
+    border-top: 1px solid var(--line);
+    padding: var(--space-5) 0;
+    cursor: none;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-5);
+    align-items: center;
+    transition: padding 0.4s ease;
+  }
+  .atelier-item:last-child { border-bottom: 1px solid var(--line); }
+  .atelier-item:hover { padding-left: var(--space-3); }
+  .atelier-item .num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+  }
+  .atelier-item .name {
+    font-family: var(--serif);
+    font-size: clamp(22px, 2.6vw, 32px);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .atelier-item .name em { font-style: italic; color: var(--rust); }
+  .atelier-item .role {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .atelier-item:hover .name { color: var(--rust); }
+
+  .atelier-quote {
+    font-family: var(--serif);
+    font-size: clamp(22px, 2.4vw, 32px);
+    font-weight: 300;
+    line-height: 1.35;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    position: sticky;
+    top: 100px;
+  }
+  .atelier-quote::before {
+    content: '"';
+    font-size: 80px;
+    color: var(--rust);
+    line-height: 0.5;
+    display: block;
+    margin-bottom: var(--space-3);
+    margin-left: -8px;
+  }
+  .atelier-quote-attr {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    font-style: normal;
+    margin-top: var(--space-5);
+    font-weight: 400;
+  }
+  .atelier-quote-attr::before {
+    content: '— ';
+    color: var(--rust);
+  }
+
+  @media (max-width: 900px) {
+    .atelier-grid { grid-template-columns: 1fr; gap: var(--space-7); }
+    .atelier-quote { position: static; }
+  }
+
+  /* ===== FABRIC / SPECS ACCORDION ===== */
+  .specs {
+    padding: var(--space-10) 0;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+    align-items: start;
+    margin-top: var(--space-7);
+  }
+  .specs-visual {
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #2a201a 0%, #1a1611 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .specs-visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(196, 90, 50, 0.04) 0px, rgba(196, 90, 50, 0.04) 1px, transparent 1px, transparent 4px),
+      repeating-linear-gradient(-45deg, rgba(232, 220, 196, 0.04) 0px, rgba(232, 220, 196, 0.04) 1px, transparent 1px, transparent 4px);
+  }
+  .specs-visual-label {
+    position: absolute;
+    bottom: var(--space-5); left: var(--space-5);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--ink-2);
+    text-transform: uppercase;
+  }
+  .specs-visual-name {
+    position: absolute;
+    top: var(--space-5); left: var(--space-5);
+    right: var(--space-5);
+    font-family: var(--serif);
+    font-size: 28px;
+    font-style: italic;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+  }
+  .specs-visual-stats {
+    position: absolute;
+    bottom: var(--space-5); right: var(--space-5);
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-2);
+    line-height: 1.8;
+    letter-spacing: 0.05em;
+  }
+  .specs-visual-stats strong {
+    color: var(--rust);
+    font-weight: 400;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  .accordion-item {
+    border-top: 1px solid var(--line-mid);
+  }
+  .accordion-item:last-child { border-bottom: 1px solid var(--line-mid); }
+  .accordion-trigger {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-5);
+    align-items: center;
+    padding: var(--space-5) 0;
+    background: none;
+    border: none;
+    cursor: none;
+    width: 100%;
+    text-align: left;
+    transition: padding 0.3s ease;
+  }
+  .accordion-trigger:hover { padding-left: var(--space-2); }
+  .accordion-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-dim);
+    letter-spacing: 0.2em;
+  }
+  .accordion-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+  .accordion-title em { font-style: italic; color: var(--rust); }
+  .accordion-icon {
+    width: 28px; height: 28px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    position: relative;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .accordion-icon::before, .accordion-icon::after {
+    content: '';
+    position: absolute;
+    background: var(--ink);
+    transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+  }
+  .accordion-icon::before {
+    top: 50%; left: 7px; right: 7px; height: 1px;
+    transform: translateY(-50%);
+  }
+  .accordion-icon::after {
+    left: 50%; top: 7px; bottom: 7px; width: 1px;
+    transform: translateX(-50%);
+  }
+  .accordion-item.open .accordion-icon { background: var(--rust); border-color: var(--rust); }
+  .accordion-item.open .accordion-icon::after { transform: translateX(-50%) rotate(90deg); }
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .accordion-content-inner {
+    padding: 0 0 var(--space-6) 60px;
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.75;
+    max-width: 540px;
+  }
+  .accordion-content-inner p + p { margin-top: var(--space-3); }
+  .accordion-content-inner ul {
+    list-style: none;
+    margin-top: var(--space-3);
+  }
+  .accordion-content-inner li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .accordion-content-inner li span:last-child {
+    color: var(--ink);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  @media (max-width: 900px) {
+    .specs-grid { grid-template-columns: 1fr; gap: var(--space-6); }
+    .accordion-content-inner { padding-left: 30px; }
+  }
+
+  /* ===== MARQUEE LARGE ===== */
+  .big-marquee {
+    padding: var(--space-7) 0;
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .big-marquee-track {
+    display: flex;
+    gap: 60px;
+    animation: scroll 45s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+  .big-marquee-item {
+    font-family: var(--serif);
+    font-size: clamp(48px, 8vw, 120px);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 60px;
+  }
+  .big-marquee-item .accent { color: var(--rust); font-style: normal; }
+  .big-marquee-item::after {
+    content: '';
+    display: inline-block;
+    width: 14px; height: 14px;
+    background: var(--rust);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ===== JOURNAL ===== */
+  .journal {
+    padding: var(--space-9) 0 var(--space-10);
+  }
+  .journal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-7);
+    margin-top: var(--space-6);
+  }
+  .journal-card {
+    cursor: none;
+    transition: transform 0.5s ease;
+  }
+  .journal-card:hover { transform: translateY(-6px); }
+  .journal-img {
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    margin-bottom: var(--space-5);
+    position: relative;
+    background: var(--bg-card);
+  }
+  .journal-img-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .journal-card:hover .journal-img-bg { transform: scale(1.06); }
+  .journal-meta {
+    display: flex;
+    gap: var(--space-4);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: var(--space-3);
+  }
+  .journal-meta .cat { color: var(--rust); }
+  .journal-title {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: var(--space-3);
+    transition: color 0.3s ease;
+  }
+  .journal-card:hover .journal-title { color: var(--rust); }
+  .journal-excerpt {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.65;
+    margin-bottom: var(--space-3);
+  }
+  .journal-read {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.3s ease, color 0.3s ease;
+  }
+  .journal-card:hover .journal-read { gap: 14px; color: var(--rust); }
+
+  @media (max-width: 900px) {
+    .journal-grid { grid-template-columns: 1fr; gap: var(--space-6); }
+  }
+
+  /* ===== STOCKISTS ===== */
+  .stockists {
+    padding: var(--space-9) 0;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--line);
+  }
+  .stockist-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: var(--space-6);
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+  }
+  .stockist {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: var(--space-5);
+    cursor: none;
+    transition: background 0.4s ease;
+    position: relative;
+  }
+  .stockist:hover { background: var(--bg); }
+  .stockist .city {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    margin-bottom: 4px;
+  }
+  .stockist .country {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: var(--space-4);
+  }
+  .stockist .name {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    margin-bottom: var(--space-3);
+  }
+  .stockist .addr {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .stockist .arrow {
+    position: absolute;
+    top: var(--space-5);
+    right: var(--space-5);
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-dim);
+    transition: transform 0.4s ease, color 0.3s ease;
+  }
+  .stockist:hover .arrow {
+    transform: translate(4px, -4px);
+    color: var(--rust);
+  }
+
+  @media (max-width: 900px) {
+    .stockist-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ===== NEWSLETTER ===== */
+  .newsletter {
+    padding: var(--space-10) var(--space-7);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+  }
+  .newsletter::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 50%, rgba(196, 90, 50, 0.08), transparent 70%);
+    pointer-events: none;
+  }
+  .newsletter-content { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; }
+  .newsletter-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--rust);
+    text-transform: uppercase;
+    margin-bottom: var(--space-5);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .newsletter-eyebrow::before, .newsletter-eyebrow::after {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--rust);
+  }
+  .newsletter-title {
+    font-family: var(--serif);
+    font-size: clamp(40px, 6vw, 84px);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    margin-bottom: var(--space-5);
+  }
+  .newsletter-title em { font-style: italic; color: var(--rust); }
+  .newsletter-desc {
+    color: var(--ink-2);
+    margin: 0 auto var(--space-7);
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 480px;
+  }
+  .newsletter-form {
+    display: flex;
+    max-width: 520px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--line-strong);
+    transition: border-color 0.3s ease;
+  }
+  .newsletter-form:focus-within { border-color: var(--rust); }
+  .newsletter-input {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 16px 0;
+    font-size: 15px;
+    outline: none;
+  }
+  .newsletter-input::placeholder { color: var(--ink-dim); font-style: italic; font-family: var(--serif); }
+  .newsletter-btn {
+    background: none;
+    border: none;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: none;
+    font-weight: 500;
+    padding: 0 var(--space-3);
+    transition: color 0.3s ease;
+  }
+  .newsletter-btn:hover { color: var(--rust); }
+  .newsletter-foot {
+    margin-top: var(--space-6);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    padding: var(--space-8) var(--space-7) var(--space-6);
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .footer-mark {
+    font-family: var(--serif);
+    font-size: clamp(80px, 16vw, 240px);
+    font-weight: 300;
+    letter-spacing: -0.05em;
+    line-height: 0.85;
+    margin-bottom: var(--space-7);
+    overflow: hidden;
+    position: relative;
+  }
+  .footer-mark em { font-style: italic; font-weight: 300; color: var(--rust); }
+  .footer-cols {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: var(--space-7);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: var(--space-5);
+  }
+  .footer-col h4 {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: var(--space-5);
+    font-weight: 400;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 10px; }
+  .footer-col a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.3s ease, padding 0.3s ease;
+    display: inline-block;
+  }
+  .footer-col a:hover { color: var(--rust); padding-left: 6px; }
+  .footer-about {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.7;
+    max-width: 380px;
+    margin-bottom: var(--space-4);
+  }
+  .footer-cert {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .footer-cert span { padding: 4px 8px; border: 1px solid var(--line-mid); }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+  .footer-bottom a { color: var(--ink-dim); text-decoration: none; transition: color 0.3s ease; }
+  .footer-bottom a:hover { color: var(--rust); }
+  @media (max-width: 900px) {
+    footer { padding: var(--space-6) 20px var(--space-5); }
+    .footer-cols { grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+  }
+  @media (max-width: 500px) {
+    .footer-cols { grid-template-columns: 1fr; }
+  }
+
+  /* ===== CART DRAWER ===== */
+  .drawer-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+  .drawer-bg.open { opacity: 1; visibility: visible; }
+  .drawer {
+    position: fixed;
+    top: 0; right: 0;
+    width: 100%;
+    max-width: 460px;
+    height: 100%;
+    background: var(--bg);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.6s cubic-bezier(0.86, 0, 0.07, 1);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--line);
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header {
+    padding: var(--space-5);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .drawer-title {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .drawer-title em { font-style: italic; color: var(--rust); }
+  .drawer-title-meta {
+    display: block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .drawer-close {
+    background: none; border: none;
+    cursor: none;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+  }
+  .drawer-close:hover { color: var(--rust); }
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-5);
+  }
+  .drawer-empty {
+    text-align: center;
+    padding: var(--space-9) 20px;
+  }
+  .drawer-empty-icon {
+    font-family: var(--serif);
+    font-size: 100px;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--line-strong);
+    line-height: 1;
+    margin-bottom: var(--space-5);
+  }
+  .drawer-empty h4 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: var(--space-3);
+  }
+  .drawer-empty h4 em { font-style: italic; color: var(--rust); }
+  .drawer-empty p {
+    font-size: 13px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    max-width: 280px;
+    margin: 0 auto var(--space-5);
+  }
+  .drawer-empty-cta {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 14px var(--space-5);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: none;
+    font-weight: 500;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  .drawer-empty-cta:hover { background: var(--rust); color: var(--bone); }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .cart-item-img {
+    width: 80px; height: 100px;
+    background: var(--bg-card);
+    overflow: hidden;
+  }
+  .cart-item-name {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 400;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .cart-item-meta {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: var(--space-3);
+  }
+  .cart-qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--line-strong);
+  }
+  .cart-qty button {
+    background: none; border: none;
+    width: 26px; height: 26px;
+    cursor: none;
+    font-size: 13px;
+    transition: color 0.3s ease;
+  }
+  .cart-qty button:hover { color: var(--rust); }
+  .cart-qty span {
+    width: 26px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .cart-item-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    align-items: flex-end;
+    gap: var(--space-4);
+  }
+  .cart-item-price {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    font-weight: 300;
+    white-space: nowrap;
+  }
+  .cart-item-remove {
+    background: none; border: none;
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: none;
+    transition: color 0.3s ease;
+  }
+  .cart-item-remove:hover { color: var(--rust); }
+
+  .drawer-footer {
+    padding: var(--space-5);
+    border-top: 1px solid var(--line);
+    background: var(--bg-soft);
+  }
+  .drawer-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+    font-size: 12px;
+  }
+  .drawer-row span:first-child {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+  .drawer-row.total {
+    padding-top: var(--space-4);
+    margin-top: var(--space-3);
+    border-top: 1px solid var(--line);
+  }
+  .drawer-row.total span:first-child {
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    font-weight: 400;
+  }
+  .drawer-row.total .total-num {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-style: italic;
+    color: var(--rust);
+    font-weight: 300;
+  }
+  .drawer-checkout {
+    width: 100%;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 18px;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: none;
+    margin-top: var(--space-4);
+    transition: background 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .drawer-checkout:hover { background: var(--rust); color: var(--bone); gap: 18px; }
+  .drawer-trust {
+    margin-top: var(--space-3);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    text-align: center;
+  }
+
+  /* ===== QUICK VIEW MODAL ===== */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    z-index: 250;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+  .modal-bg.open { opacity: 1; visibility: visible; }
+  .modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -45%);
+    width: 90%;
+    max-width: 920px;
+    max-height: 88vh;
+    background: var(--bg);
+    z-index: 251;
+    border: 1px solid var(--line);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .modal.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%);
+  }
+  .modal-img {
+    aspect-ratio: 4/5;
+    background: var(--bg-card);
+  }
+  .modal-content {
+    padding: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    overflow-y: auto;
+  }
+  .modal-cat {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--rust);
+    text-transform: uppercase;
+  }
+  .modal-name {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+  .modal-name em { font-style: italic; }
+  .modal-fabric {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-dim);
+  }
+  .modal-price {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-style: italic;
+    font-weight: 300;
+  }
+  .modal-desc {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.7;
+    margin-top: var(--space-3);
+  }
+  .modal-section {
+    border-top: 1px solid var(--line);
+    padding-top: var(--space-4);
+  }
+  .modal-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: var(--space-3);
+  }
+  .size-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  .size-btn {
+    background: none;
+    border: 1px solid var(--line-mid);
+    color: var(--ink);
+    padding: 12px 0;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    cursor: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  .size-btn:hover:not(:disabled) { border-color: var(--ink); }
+  .size-btn.selected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .size-btn:disabled {
+    color: var(--ink-faint);
+    border-color: var(--line);
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+  .modal-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: auto;
+    padding-top: var(--space-5);
+  }
+  .modal-add {
+    flex: 1;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 16px;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: none;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  .modal-add:hover { background: var(--rust); color: var(--bone); }
+  .modal-fav-btn {
+    background: none;
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    padding: 16px;
+    cursor: none;
+    aspect-ratio: 1;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-fav-btn:hover { border-color: var(--rust); color: var(--rust); }
+  .modal-fav-btn svg { width: 14px; height: 14px; }
+  .modal-close {
+    position: absolute;
+    top: var(--space-4); right: var(--space-4);
+    background: rgba(12, 11, 9, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--line-mid);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    cursor: none;
+    color: var(--ink);
+    z-index: 5;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .modal-close:hover { background: var(--rust); color: var(--bone); border-color: var(--rust); transform: rotate(90deg); }
+
+  @media (max-width: 900px) {
+    .modal { grid-template-columns: 1fr; max-height: 92vh; overflow-y: auto; }
+    .modal-img { aspect-ratio: 1; }
+    .modal-content { padding: var(--space-5); }
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: var(--space-5); left: 50%;
+    transform: translateX(-50%) translateY(150%);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 14px 24px;
+    z-index: 300;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast-icon {
+    width: 16px; height: 16px;
+    background: var(--rust);
+    border-radius: 50%;
+    color: var(--bone);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+  }
+
+  /* ===== REVEAL ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 1s cubic-bezier(0.22, 1, 0.36, 1), transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ===== MOBILE NAV ===== */
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 150;
+    transform: translateY(-100%);
+    transition: transform 0.7s cubic-bezier(0.86, 0, 0.07, 1);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-7) 20px;
+  }
+  .mobile-menu.open { transform: translateY(0); }
+  .mobile-menu-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-9);
+  }
+  .mobile-menu-close {
+    background: none; border: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .mobile-menu-links {
+    list-style: none;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .mobile-menu-links li {
+    border-top: 1px solid var(--line);
+    padding-top: var(--space-4);
+  }
+  .mobile-menu-links a {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--ink);
+    text-decoration: none;
+    font-style: italic;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .mobile-menu-links a sup {
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 10px;
+    color: var(--rust);
+    letter-spacing: 0.2em;
+  }
+  .mobile-menu-foot {
+    margin-top: auto;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    line-height: 1.8;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="cursor"></div>
+<div class="cursor-ring"></div>
+<div class="cursor-label" id="cursorLabel"></div>
+
+<div class="scroll-progress"><div class="scroll-progress-bar" id="progressBar"></div></div>
+
+<!-- ===== LOADER ===== -->
+<div class="loader" id="loader">
+  <div class="loader-mark">
+    <span>M</span><span>A</span><span>I</span><span>S</span><span>O</span><span>N</span>
+  </div>
+  <div class="loader-meta">
+    <strong>Volume XII · A·W 26</strong>
+    Cutting the season
+    <div class="loader-pct" id="loaderPct">00%</div>
+  </div>
+</div>
+
+<!-- ===== TICKER ===== -->
+<div class="ticker" id="ticker">
+  <div class="ticker-track">
+    <div class="ticker-item">Complimentary shipping over €250</div>
+    <div class="ticker-item">Volume XII releases 14 February</div>
+    <div class="ticker-item">Pieces cut & sewn in Italy and Portugal</div>
+    <div class="ticker-item">Atelier appointments — Paris · Tokyo · Milan</div>
+    <div class="ticker-item">Complimentary shipping over €250</div>
+    <div class="ticker-item">Volume XII releases 14 February</div>
+    <div class="ticker-item">Pieces cut & sewn in Italy and Portugal</div>
+    <div class="ticker-item">Atelier appointments — Paris · Tokyo · Milan</div>
+  </div>
+</div>
+
+<!-- ===== NAV ===== -->
+<nav id="nav">
+  <ul class="nav-links">
+    <li><a href="#shop">Shop <sup>12</sup></a></li>
+    <li><a href="#editorial">Lookbook</a></li>
+    <li><a href="#atelier">Atelier</a></li>
+    <li><a href="#journal">Journal</a></li>
+  </ul>
+  <a href="#" class="logo">MAISON <i>noré</i></a>
+  <div class="nav-actions">
+    <div class="currency-toggle" id="currency">
+      <button class="active" data-cur="EUR">€</button>
+      <button data-cur="GBP">£</button>
+      <button data-cur="USD">$</button>
+    </div>
+    <button>Search</button>
+    <button class="cart-btn" id="cartOpen">
+      Bag <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="menu-toggle" id="menuToggle">Menu</button>
+  </div>
+</nav>
+
+<!-- ===== MOBILE MENU ===== -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-top">
+    <span class="logo">MAISON <i>noré</i></span>
+    <button class="mobile-menu-close" id="mobileClose">Close ×</button>
+  </div>
+  <ul class="mobile-menu-links">
+    <li><a href="#shop" class="mobile-link">Shop <sup>01</sup></a></li>
+    <li><a href="#editorial" class="mobile-link">Lookbook <sup>02</sup></a></li>
+    <li><a href="#atelier" class="mobile-link">Atelier <sup>03</sup></a></li>
+    <li><a href="#journal" class="mobile-link">Journal <sup>04</sup></a></li>
+    <li><a href="#stockists" class="mobile-link">Stockists <sup>05</sup></a></li>
+  </ul>
+  <div class="mobile-menu-foot">
+    Paris · Tokyo · Milan<br>
+    +33 1 42 33 28 14<br>
+    studio@maison-nore.com
+  </div>
+</div>
+
+<!-- ===== HERO with 3D shirt ===== -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="shirt-canvas-wrap">
+    <canvas id="shirtCanvas"></canvas>
+  </div>
+  <div class="hero-text">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      Volume XII — Released 14·02·26
+    </div>
+    <h1 class="hero-title">
+      <div class="line"><span class="word">Quiet</span></div>
+      <div class="line"><span class="word italic">defiance,</span></div>
+      <div class="line"><span class="word">in cloth.</span></div>
+    </h1>
+    <div class="hero-meta">
+      <p class="hero-desc">Twelve garments forming the spine of a season — drawn from the granite coast of Brittany. Cut in small editions from cloth specified in our atelier.</p>
+      <a href="#shop" class="hero-cta">
+        <span>Enter the season</span>
+        <span class="hero-cta-arrow">[ → ]</span>
+      </a>
+    </div>
+  </div>
+  <div class="hero-side">
+    <div>
+      <strong>12<em>·</em>26</strong>
+      Pieces<br>this season
+    </div>
+    <div>
+      <strong><em>04</em></strong>
+      Drops<br>per year
+    </div>
+    <div>
+      <strong><em>£</em>180</strong>
+      Stockists<br>worldwide
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-hint-line"></div>
+    <span>Scroll to begin</span>
+  </div>
+</section>
+
+<!-- ===== SHOP ===== -->
+<section id="shop" class="container">
+  <div class="section-head">
+    <div>
+      <span class="section-num">001 · The Selection</span>
+      <h2 class="section-title">The <em class="accent">essentials,</em><br>volume <em>twelve.</em></h2>
+    </div>
+    <div></div>
+    <div class="section-aside">
+      <p class="section-desc">A studied collection of outerwear, knitwear, tailoring, and trouser. Each piece cut from cloth specified for our atelier — heavy melton, brushed cashmere, raw selvedge denim — and assembled in runs of fewer than three hundred.</p>
+    </div>
+  </div>
+
+  <div class="shop-controls">
+    <div class="filter-pills" id="filters">
+      <button class="filter-pill active" data-filter="all">All <span class="n">12</span></button>
+      <button class="filter-pill" data-filter="outerwear">Outerwear <span class="n">04</span></button>
+      <button class="filter-pill" data-filter="knitwear">Knitwear <span class="n">03</span></button>
+      <button class="filter-pill" data-filter="tailoring">Tailoring <span class="n">02</span></button>
+      <button class="filter-pill" data-filter="trousers">Trousers <span class="n">03</span></button>
+    </div>
+    <div class="filter-count"><em id="count">12</em> pieces shown</div>
+    <div class="sort">
+      <span>Sort</span>
+      <select id="sort">
+        <option value="featured">Featured</option>
+        <option value="new">Newest</option>
+        <option value="price-low">Price ↑</option>
+        <option value="price-high">Price ↓</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="product-grid" id="grid"></div>
+</section>
+
+<!-- ===== EDITORIAL ===== -->
+<section class="editorial" id="editorial">
+  <div class="container">
+    <div class="section-head" style="border-top:none; padding-top: 0;">
+      <div>
+        <span class="section-num">002 · Lookbook</span>
+        <h2 class="section-title">A <em class="accent">field</em><br>study, of sorts.</h2>
+      </div>
+      <div></div>
+      <div class="section-aside">
+        <span class="label">Photographed in</span>
+        <span class="value">Côte de Granit Rose</span>
+        <p class="section-desc" style="margin-top: 16px;">Photographed across the granite coast of Brittany over four mornings in November — early light, low fog, salted air, an unaccompanied walk.</p>
+      </div>
+    </div>
+    <div class="editorial-grid">
+      <div class="edit-card">
+        <div class="edit-bg" style="background:linear-gradient(135deg,#3a2e25 0%,#1a1611 100%);"></div>
+        <div class="edit-overlay"></div>
+        <div class="edit-meta"><span class="frame">Frame 01·12</span><span>Ploumanac'h</span></div>
+        <div class="edit-content">
+          <div class="edit-title">The long <em>walk.</em></div>
+          <div class="edit-loc">06:14 · Mont Blanc Overcoat</div>
+        </div>
+      </div>
+      <div class="edit-card">
+        <div class="edit-bg" style="background:linear-gradient(225deg,#5a4332 0%,#2a201a 100%);"></div>
+        <div class="edit-overlay"></div>
+        <div class="edit-meta"><span class="frame">Frame 04·12</span><span>Trégastel</span></div>
+        <div class="edit-content">
+          <div class="edit-title">Granite, fog, <em>linen.</em></div>
+          <div class="edit-loc">07:42 · Salt &amp; Smoke Blazer</div>
+        </div>
+      </div>
+      <div class="edit-card">
+        <div class="edit-bg" style="background:linear-gradient(45deg,#1f1812 0%,#5a4332 100%);"></div>
+        <div class="edit-overlay"></div>
+        <div class="edit-meta"><span class="frame">Frame 07·12</span><span>Île-Grande</span></div>
+        <div class="edit-content">
+          <div class="edit-title">Morning, <em>uncoupled.</em></div>
+          <div class="edit-loc">08:11 · Hisae Cashmere</div>
+        </div>
+      </div>
+      <div class="edit-card">
+        <div class="edit-bg" style="background:linear-gradient(315deg,#2a201a 0%,#6a4d3a 100%);"></div>
+        <div class="edit-overlay"></div>
+        <div class="edit-meta"><span class="frame">Frame 11·12</span><span>Atelier, Paris</span></div>
+        <div class="edit-content">
+          <div class="edit-title">Studio, <em>still.</em></div>
+          <div class="edit-loc">14:23 · Three-Piece Mk II</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BIG MARQUEE ===== -->
+<div class="big-marquee">
+  <div class="big-marquee-track">
+    <div class="big-marquee-item">Quiet defiance, <span class="accent">in cloth</span></div>
+    <div class="big-marquee-item">Made for <span class="accent">longevity</span></div>
+    <div class="big-marquee-item">Cut in <span class="accent">Italy</span> & Portugal</div>
+    <div class="big-marquee-item">Quiet defiance, <span class="accent">in cloth</span></div>
+    <div class="big-marquee-item">Made for <span class="accent">longevity</span></div>
+    <div class="big-marquee-item">Cut in <span class="accent">Italy</span> & Portugal</div>
+  </div>
+</div>
+
+<!-- ===== ATELIER / MAKERS ===== -->
+<section class="atelier container" id="atelier">
+  <div class="section-head">
+    <div>
+      <span class="section-num">003 · The Atelier</span>
+      <h2 class="section-title">Hands that <em>make</em><br>the work.</h2>
+    </div>
+    <div></div>
+    <div class="section-aside">
+      <span class="label">Studio est.</span>
+      <span class="value">Paris, 2014</span>
+    </div>
+  </div>
+
+  <div class="atelier-grid">
+    <ul class="atelier-list">
+      <li class="atelier-item">
+        <span class="num">01</span>
+        <span class="name">Élise <em>Noré</em></span>
+        <span class="role">Founder / Director</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">02</span>
+        <span class="name">Marco <em>Brunelli</em></span>
+        <span class="role">Master Tailor · Biella</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">03</span>
+        <span class="name">Hisae <em>Tanaka</em></span>
+        <span class="role">Natural Dyer · Kyoto</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">04</span>
+        <span class="name">Joaquim <em>Salgado</em></span>
+        <span class="role">Knitwear · Vila do Conde</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">05</span>
+        <span class="name">Fabienne <em>Crozier</em></span>
+        <span class="role">Pattern Cutter · Paris</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">06</span>
+        <span class="name">Yuki <em>Miyazawa</em></span>
+        <span class="role">Indigo Dye Studio · Tokushima</span>
+      </li>
+    </ul>
+
+    <div class="atelier-quote">
+      We refuse to design at speed. A coat we ship this autumn was first sketched in 2023 — patterned in 2024, prototyped through five fittings, then cut. The slow part is the point.
+      <div class="atelier-quote-attr">Élise Noré, Founder, Spring 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FABRIC SPECS ACCORDION ===== -->
+<section class="specs">
+  <div class="container">
+    <div class="section-head" style="border-top:none; padding-top: 0;">
+      <div>
+        <span class="section-num">004 · The Cloth</span>
+        <h2 class="section-title">A <em class="accent">specification,</em><br>in detail.</h2>
+      </div>
+      <div></div>
+      <div class="section-aside">
+        <p class="section-desc">Featured fabric of the season, from the Brunelli mill outside Biella, woven in lots of fewer than two hundred metres.</p>
+      </div>
+    </div>
+
+    <div class="specs-grid">
+      <div class="specs-visual">
+        <div class="specs-visual-name">Melton<br><em>—</em> Brunelli 04·N</div>
+        <div class="specs-visual-label">Magnified · 28×</div>
+        <div class="specs-visual-stats">
+          <strong>680gsm</strong><br>
+          90% Wool<br>
+          10% Cashmere<br>
+          Boiled finish
+        </div>
+      </div>
+
+      <div>
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span class="accordion-num">01</span>
+            <span class="accordion-title"><em>Fibre</em> & origin</span>
+            <span class="accordion-icon"></span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p>A blend of merino wool sourced from the Vermandois region of northern France and grade-A cashmere from Inner Mongolia, sorted by hand at our partner mill in Biella.</p>
+              <p>Both fibres are spun to a 2/30Nm count, plied, and woven on Vandewiele looms dating to the 1970s — slow, careful, and impossible to rush.</p>
+              <ul>
+                <li><span>Wool origin</span><span>Vermandois, FR</span></li>
+                <li><span>Cashmere origin</span><span>Inner Mongolia</span></li>
+                <li><span>Spinner</span><span>Filatura di Pollone</span></li>
+                <li><span>Mill</span><span>Brunelli, Biella</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span class="accordion-num">02</span>
+            <span class="accordion-title">Construction <em>&amp; weave</em></span>
+            <span class="accordion-icon"></span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p>Boiled and milled over forty-four hours to achieve a tight, dense hand. The cloth is wind-resistant without lining, weather-tolerant without coating, and warmer than its weight suggests.</p>
+              <ul>
+                <li><span>Weight</span><span>680 gsm</span></li>
+                <li><span>Width</span><span>148 cm</span></li>
+                <li><span>Weave</span><span>2/2 twill, milled</span></li>
+                <li><span>Finish</span><span>Boiled, brushed, raised</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span class="accordion-num">03</span>
+            <span class="accordion-title">Wear <em>&amp; care</em></span>
+            <span class="accordion-icon"></span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p>The cloth softens with wear and improves with age — the brushed surface developing a patina of gentle felting around the cuffs and shoulders within the first season. Air after wearing; brush in the direction of the nap; dry-clean only when necessary, and never more than once a season.</p>
+              <p>Damage to the cloth is repairable indefinitely through our complimentary atelier service. Send the garment, and we return it.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span class="accordion-num">04</span>
+            <span class="accordion-title">Provenance <em>&amp; certification</em></span>
+            <span class="accordion-icon"></span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p>Every metre carries a traceable lot number recorded against fibre source, dye batch, and weave date. Our supply chain is audited annually by an independent consultancy specialising in slow-fashion provenance.</p>
+              <ul>
+                <li><span>Standard</span><span>RWS · GCS</span></li>
+                <li><span>Audit</span><span>Slowmark, Paris</span></li>
+                <li><span>Lot traceability</span><span>Full chain</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== JOURNAL ===== -->
+<section class="journal container" id="journal">
+  <div class="section-head" style="padding-top: 0; border-top: none;">
+    <div>
+      <span class="section-num">005 · Journal</span>
+      <h2 class="section-title">Notes from <em>the studio.</em></h2>
+    </div>
+    <div></div>
+    <div class="section-aside">
+      <span class="label">Last published</span>
+      <span class="value">14 February</span>
+    </div>
+  </div>
+  <div class="journal-grid">
+    <article class="journal-card reveal">
+      <div class="journal-img"><div class="journal-img-bg" style="background:linear-gradient(135deg,#3a2e25,#1a1611);"></div></div>
+      <div class="journal-meta"><span class="cat">On Craft</span><span>·</span><span>11 Feb 2026</span><span>·</span><span>8 min</span></div>
+      <h3 class="journal-title">The Brunelli mill, in late winter</h3>
+      <p class="journal-excerpt">Where our cloth is woven. A visit with Marco — third-generation owner of a hundred-year mill — who still rejects forty per cent of what arrives at his loading dock.</p>
+      <span class="journal-read">Read essay [ → ]</span>
+    </article>
+    <article class="journal-card reveal">
+      <div class="journal-img"><div class="journal-img-bg" style="background:linear-gradient(225deg,#4a3528,#2a201a);"></div></div>
+      <div class="journal-meta"><span class="cat">In Conversation</span><span>·</span><span>04 Feb 2026</span><span>·</span><span>12 min</span></div>
+      <h3 class="journal-title">Hisae Tanaka, on patience</h3>
+      <p class="journal-excerpt">Walnut, indigo, oak gall. A long conversation with our natural dyer in her Kyoto studio about pigment, time, and the discipline required to coax colour from leaves.</p>
+      <span class="journal-read">Read interview [ → ]</span>
+    </article>
+    <article class="journal-card reveal">
+      <div class="journal-img"><div class="journal-img-bg" style="background:linear-gradient(45deg,#1a1611,#5a4332);"></div></div>
+      <div class="journal-meta"><span class="cat">Process</span><span>·</span><span>22 Jan 2026</span><span>·</span><span>6 min</span></div>
+      <h3 class="journal-title">On the cutting of a coat</h3>
+      <p class="journal-excerpt">Eighteen panels, six fittings, one master cutter. A short film on how our overcoats are made — and a candid argument for why it ought to take a season.</p>
+      <span class="journal-read">Watch film [ → ]</span>
+    </article>
+  </div>
+</section>
+
+<!-- ===== STOCKISTS ===== -->
+<section class="stockists" id="stockists">
+  <div class="container">
+    <div class="section-head" style="padding-top: 0; border-top: none;">
+      <div>
+        <span class="section-num">006 · Stockists</span>
+        <h2 class="section-title">Where to <em>find us.</em></h2>
+      </div>
+      <div></div>
+      <div class="section-aside">
+        <span class="label">Currently</span>
+        <span class="value">180+ stockists</span>
+      </div>
+    </div>
+    <div class="stockist-grid">
+      <div class="stockist">
+        <div class="city">Paris</div>
+        <div class="country">France · 75003</div>
+        <div class="name">Maison Noré · Atelier &amp; Showroom</div>
+        <div class="addr">14 rue de Saintonge<br>By appointment</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Tokyo</div>
+        <div class="country">Japan · 150-0001</div>
+        <div class="name">Studio Aoyama</div>
+        <div class="addr">3-12-8 Jingūmae<br>Shibuya-ku</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Milan</div>
+        <div class="country">Italy · 20121</div>
+        <div class="name">Galleria Brera</div>
+        <div class="addr">Via Solferino 24<br>Mon — Sat</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">London</div>
+        <div class="country">UK · W1S</div>
+        <div class="name">Mortimer House</div>
+        <div class="addr">37 Mortimer Street<br>Members &amp; guests</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Copenhagen</div>
+        <div class="country">Denmark · 1051</div>
+        <div class="name">Storm</div>
+        <div class="addr">Store Regnegade 1<br>Mon — Sat</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">New York</div>
+        <div class="country">USA · 10013</div>
+        <div class="name">Project No. 8</div>
+        <div class="addr">38 Orchard Street<br>By appointment</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Seoul</div>
+        <div class="country">South Korea · 04420</div>
+        <div class="name">Buoy Hannam</div>
+        <div class="addr">Hannam-dong 683-5<br>Tue — Sun</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Berlin</div>
+        <div class="country">Germany · 10178</div>
+        <div class="name">Andreas Murkudis</div>
+        <div class="addr">Potsdamer Straße 81e<br>Mon — Sat</div>
+        <span class="arrow">↗</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NEWSLETTER ===== -->
+<section class="newsletter">
+  <div class="newsletter-content">
+    <div class="newsletter-eyebrow">007 · Correspondence</div>
+    <h2 class="newsletter-title">Letters, <em>occasionally.</em></h2>
+    <p class="newsletter-desc">No noise — four dispatches a year. Release announcements, studio films, the rare archival sale, and an occasional essay we've been working through. Addressed to you first.</p>
+    <form class="newsletter-form" id="newsletterForm">
+      <input type="email" class="newsletter-input" placeholder="your address" required>
+      <button type="submit" class="newsletter-btn">Subscribe [→]</button>
+    </form>
+    <div class="newsletter-foot">No third-party sharing · Unsubscribe at any time</div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-mark">Maison <em>noré.</em></div>
+  <div class="footer-cols">
+    <div class="footer-col">
+      <h4>The House</h4>
+      <p class="footer-about">Founded in Paris in 2014. Slow, considered garments cut from cloth specified for our atelier — for those who notice the difference. Made in Italy and Portugal.</p>
+      <div class="footer-cert">
+        <span>RWS Certified</span>
+        <span>GCS Audited</span>
+        <span>B Corp 2024</span>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="#">All Pieces</a></li>
+        <li><a href="#">Outerwear</a></li>
+        <li><a href="#">Knitwear</a></li>
+        <li><a href="#">Tailoring</a></li>
+        <li><a href="#">Trouser</a></li>
+        <li><a href="#">Archive Sale</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>House</h4>
+      <ul>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">The Atelier</a></li>
+        <li><a href="#">Stockists</a></li>
+        <li><a href="#">Press Room</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Repair Service</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Service</h4>
+      <ul>
+        <li><a href="#">Contact Atelier</a></li>
+        <li><a href="#">Shipping &amp; Returns</a></li>
+        <li><a href="#">Care Guide</a></li>
+        <li><a href="#">Fit &amp; Sizing</a></li>
+        <li><a href="#">Made-to-Measure</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© MMXXVI Maison Noré · 14 rue de Saintonge, Paris 75003</span>
+    <span>Volume XII · A·W 26</span>
+    <span><a href="#">Instagram</a> · <a href="#">Substack</a> · <a href="#">Pinterest</a></span>
+  </div>
+</footer>
+
+<!-- ===== CART DRAWER ===== -->
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div>
+      <h3 class="drawer-title">The <em>bag</em></h3>
+      <span class="drawer-title-meta" id="drawerCount">0 pieces · Free returns</span>
+    </div>
+    <button class="drawer-close" id="drawerClose">Close ×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer" id="drawerFooter" style="display:none;">
+    <div class="drawer-row"><span>Subtotal</span><span id="subtotal">€0</span></div>
+    <div class="drawer-row"><span>Shipping</span><span>Calculated at checkout</span></div>
+    <div class="drawer-row"><span>VAT (incl.)</span><span id="vat">€0</span></div>
+    <div class="drawer-row total"><span>Total</span><span class="total-num" id="total">€0</span></div>
+    <button class="drawer-checkout">
+      <span>Proceed to checkout</span>
+      <span>[→]</span>
+    </button>
+    <div class="drawer-trust">Secure · Stripe · Shop Pay · Klarna</div>
+  </div>
+</aside>
+
+<!-- ===== QUICK VIEW MODAL ===== -->
+<div class="modal-bg" id="modalBg"></div>
+<div class="modal" id="modal">
+  <button class="modal-close" id="modalClose">×</button>
+  <div class="modal-img" id="modalImg"></div>
+  <div class="modal-content">
+    <span class="modal-cat" id="modalCat">Outerwear · ref. 04·N</span>
+    <h2 class="modal-name" id="modalName">Mont Blanc Overcoat</h2>
+    <span class="modal-fabric" id="modalFabric">680gsm wool & cashmere melton — Brunelli, Biella</span>
+    <div class="modal-price" id="modalPrice">€1,240</div>
+    <p class="modal-desc" id="modalDesc">A long, double-breasted overcoat with peaked lapels and a half-canvas chest. Cut on the bias for shape without padding, hand-finished at the buttonholes, and lined in cupro for slip and weight. Designed to soften from year one and to be repaired indefinitely.</p>
+
+    <div class="modal-section">
+      <div class="modal-section-label">Select Size · UK</div>
+      <div class="size-grid" id="sizeGrid"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-add" id="modalAdd">Add to bag — €1,240</button>
+      <button class="modal-fav-btn" id="modalFav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 21s-7-4.5-9.5-9c-2.5-4.5 1-9 5-9 2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 4 0 7.5 4.5 5 9C19 16.5 12 21 12 21z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toastText">Added to bag</span>
+</div>
+
+<script>
+/* ============================================================
+   MAISON NORÉ — A·W 26
+   ============================================================ */
+
+/* ---------- DATA ---------- */
+const products = [
+  { id: 1, name: 'Mont Blanc', sub: 'Overcoat', cat: 'outerwear', catLabel: 'Outerwear', ref: '04·N', price: 1240, oldPrice: null, tag: null, fabric: '680gsm wool & cashmere melton', isNew: false, sortOrder: 1, colors: ['#3a2e25', '#0e0d0b', '#5a4332', '#a8825c'], grad: 'linear-gradient(135deg, #3a2e25, #1a1611 80%)' },
+  { id: 2, name: 'Coromandel', sub: 'Knit', cat: 'knitwear', catLabel: 'Knitwear', ref: '11·N', price: 480, oldPrice: null, tag: 'new', fabric: '12gg lambswool & nylon, brushed', isNew: true, sortOrder: 2, colors: ['#c9a961', '#0e0d0b', '#a89e8c'], grad: 'linear-gradient(225deg, #5a4332, #2a201a)' },
+  { id: 3, name: 'Atelier', sub: 'Wool Trouser', cat: 'trousers', catLabel: 'Trouser', ref: '07·N', price: 380, oldPrice: null, tag: null, fabric: '320gsm worsted, single-pleat', isNew: false, sortOrder: 3, colors: ['#0e0d0b', '#3a2e25', '#a89e8c'], grad: 'linear-gradient(45deg, #1f1812, #3a2e25)' },
+  { id: 4, name: 'Salt & Smoke', sub: 'Blazer', cat: 'tailoring', catLabel: 'Tailoring', ref: '02·N', price: 920, oldPrice: 1100, tag: 'sale', fabric: '280gsm linen-wool hopsack', isNew: false, sortOrder: 4, colors: ['#3a2e25', '#0e0d0b'], grad: 'linear-gradient(315deg, #4a3528, #2a201a)' },
+  { id: 5, name: 'Hisae', sub: 'Cashmere Roll', cat: 'knitwear', catLabel: 'Knitwear', ref: '12·N', price: 540, oldPrice: null, tag: 'new', fabric: 'Pure grade-A cashmere, naturally dyed', isNew: true, sortOrder: 5, colors: ['#c9a961', '#a89e8c', '#0e0d0b', '#5a4332'], grad: 'linear-gradient(135deg, #6a4d3a, #3a2e25)' },
+  { id: 6, name: 'Brittany', sub: 'Field Jacket', cat: 'outerwear', catLabel: 'Outerwear', ref: '05·N', price: 780, oldPrice: null, tag: null, fabric: '420gsm dry-waxed cotton canvas', isNew: false, sortOrder: 6, colors: ['#5a4332', '#3a2e25'], grad: 'linear-gradient(225deg, #4a3528, #1f1812)' },
+  { id: 7, name: 'Selvedge', sub: 'Denim 04', cat: 'trousers', catLabel: 'Trouser', ref: '08·N', price: 320, oldPrice: null, tag: 'last', fabric: '14oz raw selvedge, Okayama', isNew: false, sortOrder: 7, colors: ['#1a2a3a', '#0e0d0b'], grad: 'linear-gradient(45deg, #1a2a3a, #0e1620)' },
+  { id: 8, name: 'Granite', sub: 'Wool Coat', cat: 'outerwear', catLabel: 'Outerwear', ref: '03·N', price: 1480, oldPrice: null, tag: null, fabric: '720gsm undyed wool melton', isNew: false, sortOrder: 8, colors: ['#a89e8c', '#3a2e25'], grad: 'linear-gradient(315deg, #2a201a, #5a4a3a)' },
+  { id: 9, name: 'Linen', sub: 'Pleat Trouser', cat: 'trousers', catLabel: 'Trouser', ref: '09·N', price: 290, oldPrice: 360, tag: 'sale', fabric: '240gsm Belgian linen', isNew: false, sortOrder: 9, colors: ['#c9b89e', '#a89e8c'], grad: 'linear-gradient(135deg, #8a7560, #5a4a3a)' },
+  { id: 10, name: 'Studio', sub: 'Crewneck', cat: 'knitwear', catLabel: 'Knitwear', ref: '10·N', price: 360, oldPrice: null, tag: null, fabric: '7gg merino, fully fashioned', isNew: false, sortOrder: 10, colors: ['#0e0d0b', '#3a2e25', '#a89e8c'], grad: 'linear-gradient(225deg, #2a201a, #1a1611)' },
+  { id: 11, name: 'Three-Piece', sub: 'Suit Mk II', cat: 'tailoring', catLabel: 'Tailoring', ref: '01·N', price: 1680, oldPrice: null, tag: 'new', fabric: '280gsm super 110s, Loro Piana', isNew: true, sortOrder: 11, colors: ['#0e0d0b', '#3a2e25'], grad: 'linear-gradient(45deg, #1f1812, #2a201a)' },
+  { id: 12, name: 'Camel Hair', sub: 'Topcoat', cat: 'outerwear', catLabel: 'Outerwear', ref: '06·N', price: 1620, oldPrice: null, tag: null, fabric: '600gsm pure camel hair', isNew: false, sortOrder: 12, colors: ['#a8825c', '#5a4332'], grad: 'linear-gradient(315deg, #6a4d3a, #a8825c)' },
+];
+
+const cart = [];
+const favs = new Set();
+let activeFilter = 'all';
+let activeSort = 'featured';
+let currency = { code: 'EUR', symbol: '€', rate: 1 };
+const rates = { EUR: 1, GBP: 0.85, USD: 1.08 };
+let activeProductId = null;
+let activeSize = null;
+const sizes = ['XS', 'S', 'M', 'L', 'XL'];
+
+/* ============================================================
+   3D T-SHIRT — three.js
+   ============================================================ */
+let shirtMesh, shirtGroup, scene, camera, renderer;
+let scrollProgress = 0;
+let targetScrollProgress = 0;
+let mouseXNorm = 0, mouseYNorm = 0;
+
+function initShirt() {
+  const canvas = document.getElementById('shirtCanvas');
+  const wrap = canvas.parentElement;
+
+  scene = new THREE.Scene();
+
+  const aspect = wrap.clientWidth / wrap.clientHeight;
+  camera = new THREE.PerspectiveCamera(35, aspect, 0.1, 100);
+  camera.position.set(0, 0, 9);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+
+  // ============ T-SHIRT GEOMETRY ============
+  // Build silhouette via 2D shape + extrude
+  const shape = new THREE.Shape();
+
+  // Path drawn from neckline (top) clockwise around the t-shirt
+  // Coordinates roughly fit within (-2..2, -3..2)
+  shape.moveTo(-0.55, 1.85);                           // left neck
+  shape.bezierCurveTo(-0.8, 1.95, -1.0, 1.9, -1.2, 1.8);  // shoulder slope
+  shape.lineTo(-1.95, 1.5);                            // upper sleeve outer
+  shape.bezierCurveTo(-2.15, 1.4, -2.2, 1.3, -2.05, 1.1); // sleeve cap
+  shape.lineTo(-1.55, 0.7);                            // sleeve bottom
+  shape.bezierCurveTo(-1.4, 0.62, -1.3, 0.58, -1.2, 0.65); // armpit curve
+  shape.lineTo(-1.15, 0.45);                           // side under arm
+  shape.bezierCurveTo(-1.25, 0.0, -1.3, -0.8, -1.2, -1.7); // body taper
+  shape.lineTo(-1.18, -2.3);                           // hem left
+  shape.bezierCurveTo(-1.18, -2.42, -1.15, -2.45, -1.0, -2.45);
+  shape.lineTo(1.0, -2.45);                            // hem
+  shape.bezierCurveTo(1.15, -2.45, 1.18, -2.42, 1.18, -2.3);
+  shape.lineTo(1.2, -1.7);                             // body right
+  shape.bezierCurveTo(1.3, -0.8, 1.25, 0.0, 1.15, 0.45);
+  shape.lineTo(1.2, 0.65);                             // armpit right
+  shape.bezierCurveTo(1.3, 0.58, 1.4, 0.62, 1.55, 0.7); // sleeve start
+  shape.lineTo(2.05, 1.1);                             // sleeve outer right
+  shape.bezierCurveTo(2.2, 1.3, 2.15, 1.4, 1.95, 1.5);
+  shape.lineTo(1.2, 1.8);                              // shoulder
+  shape.bezierCurveTo(1.0, 1.9, 0.8, 1.95, 0.55, 1.85); // right neck
+
+  // Neckline (curve down and back up across the front)
+  shape.bezierCurveTo(0.4, 1.7, 0.25, 1.55, 0, 1.55);
+  shape.bezierCurveTo(-0.25, 1.55, -0.4, 1.7, -0.55, 1.85);
+
+  const extrudeSettings = {
+    depth: 0.32,
+    bevelEnabled: true,
+    bevelThickness: 0.08,
+    bevelSize: 0.08,
+    bevelOffset: 0,
+    bevelSegments: 6,
+    curveSegments: 32,
+  };
+
+  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  geometry.center();
+  geometry.computeVertexNormals();
+
+  // Slightly displace vertices for fabric drape (front + back faces)
+  const pos = geometry.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const z = pos.getZ(i);
+    // fabric drape ripple
+    const ripple = Math.sin(y * 1.5 + x * 0.7) * 0.04 + Math.cos(x * 2.0) * 0.025;
+    // drape effect — bulge front (positive z) more
+    const bulge = z > 0 ? 0.05 : -0.02;
+    pos.setZ(i, z + ripple + bulge);
+  }
+  geometry.computeVertexNormals();
+
+  // Material — fabric-like with slight roughness
+  const material = new THREE.MeshStandardMaterial({
+    color: 0xe8dcc4,         // bone
+    roughness: 0.85,
+    metalness: 0.0,
+    flatShading: false,
+    side: THREE.DoubleSide,
+  });
+
+  shirtMesh = new THREE.Mesh(geometry, material);
+
+  // Stitching lines: a thin tube around perimeter for hem/sleeve detail
+  // Use the 2D shape's points and lift them slightly in z
+  const stitchPoints = shape.getPoints(180);
+  const stitchGeoFront = new THREE.BufferGeometry().setFromPoints(
+    stitchPoints.map(p => new THREE.Vector3(p.x, p.y, 0.18))
+  );
+  const stitchGeoBack = new THREE.BufferGeometry().setFromPoints(
+    stitchPoints.map(p => new THREE.Vector3(p.x, p.y, -0.18))
+  );
+  const stitchMat = new THREE.LineBasicMaterial({ color: 0xc45a32, linewidth: 1, transparent: true, opacity: 0.55 });
+  const stitchFront = new THREE.LineLoop(stitchGeoFront, stitchMat);
+  const stitchBack = new THREE.LineLoop(stitchGeoBack, stitchMat);
+  stitchFront.geometry.translate(-geometry.boundingBox?.getCenter(new THREE.Vector3()).x || 0, 0, 0);
+
+  // Group everything so we rotate together
+  shirtGroup = new THREE.Group();
+  shirtGroup.add(shirtMesh);
+  shirtGroup.add(stitchFront);
+  shirtGroup.add(stitchBack);
+
+  // Center stitching to mesh
+  const box = new THREE.Box3().setFromObject(shirtMesh);
+  const centerOffset = box.getCenter(new THREE.Vector3());
+  stitchFront.position.sub(centerOffset);
+  stitchBack.position.sub(centerOffset);
+
+  shirtGroup.scale.setScalar(0.95);
+  scene.add(shirtGroup);
+
+  // ============ LIGHTING ============
+  const ambient = new THREE.AmbientLight(0xfff5e0, 0.35);
+  scene.add(ambient);
+
+  // Key light — warm rust
+  const key = new THREE.DirectionalLight(0xffb088, 1.2);
+  key.position.set(5, 4, 6);
+  scene.add(key);
+
+  // Rim light — warm
+  const rim = new THREE.DirectionalLight(0xc45a32, 0.7);
+  rim.position.set(-6, 2, -4);
+  scene.add(rim);
+
+  // Fill light — soft cool
+  const fill = new THREE.DirectionalLight(0xa89e8c, 0.4);
+  fill.position.set(-3, -3, 5);
+  scene.add(fill);
+
+  // Top light for highlights
+  const top = new THREE.DirectionalLight(0xfff0d8, 0.5);
+  top.position.set(0, 8, 2);
+  scene.add(top);
+
+  // initial position
+  shirtGroup.rotation.set(0, -0.4, 0.05);
+
+  animateShirt();
+}
+
+function animateShirt() {
+  requestAnimationFrame(animateShirt);
+
+  if (!shirtGroup) return;
+
+  // Smoothly interpolate to target scroll
+  scrollProgress += (targetScrollProgress - scrollProgress) * 0.06;
+
+  const t = performance.now() * 0.001;
+
+  // Scroll-based rotation (full Y rotation across page) + tilt
+  const baseY = -0.4 + scrollProgress * Math.PI * 1.8;
+  const baseX = scrollProgress * 0.4 - 0.05;
+
+  // Mouse parallax (subtle)
+  shirtGroup.rotation.y = baseY + mouseXNorm * 0.15 + Math.sin(t * 0.4) * 0.05;
+  shirtGroup.rotation.x = baseX + mouseYNorm * 0.1 + Math.sin(t * 0.6) * 0.02;
+  shirtGroup.rotation.z = 0.05 + Math.sin(t * 0.3) * 0.03;
+
+  // Float
+  shirtGroup.position.y = Math.sin(t * 0.7) * 0.12 - scrollProgress * 0.3;
+
+  // Scale slightly with scroll
+  const sc = 0.95 - scrollProgress * 0.08;
+  shirtGroup.scale.setScalar(sc);
+
+  // Subtle "fabric breathing" — tweak vertices over time
+  if (shirtMesh && shirtMesh.geometry.attributes.position) {
+    // (skipping live vertex updates for perf; ripple already baked in)
+  }
+
+  renderer.render(scene, camera);
+}
+
+function onShirtResize() {
+  if (!camera || !renderer) return;
+  const wrap = document.getElementById('shirtCanvas').parentElement;
+  camera.aspect = wrap.clientWidth / wrap.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+}
+
+/* ============================================================
+   LOADER
+   ============================================================ */
+let loaderPctValue = 0;
+function tickLoader() {
+  loaderPctValue += Math.random() * 8 + 2;
+  if (loaderPctValue > 100) loaderPctValue = 100;
+  document.getElementById('loaderPct').textContent = String(Math.floor(loaderPctValue)).padStart(2, '0') + '%';
+  if (loaderPctValue < 100) setTimeout(tickLoader, 90);
+}
+tickLoader();
+
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1700);
+});
+
+/* ============================================================
+   CURSOR
+   ============================================================ */
+const cursor = document.querySelector('.cursor');
+const cursorRing = document.querySelector('.cursor-ring');
+const cursorLabel = document.getElementById('cursorLabel');
+let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+let ringX = mouseX, ringY = mouseY;
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  cursor.style.transform = `translate(${mouseX - 3}px, ${mouseY - 3}px)`;
+  cursorLabel.style.transform = `translate(${mouseX}px, ${mouseY + 30}px) translate(-50%, -50%)`;
+
+  // Mouse parallax for shirt
+  mouseXNorm = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseYNorm = -(e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+(function ring() {
+  ringX += (mouseX - ringX) * 0.16;
+  ringY += (mouseY - ringY) * 0.16;
+  cursorRing.style.transform = `translate(${ringX - 16}px, ${ringY - 16}px)`;
+  requestAnimationFrame(ring);
+})();
+
+function bindCursor(scope = document) {
+  scope.querySelectorAll('a, button, .product, .edit-card, .journal-card, .stockist, .atelier-item, .accordion-trigger, .color-swatch, input').forEach(el => {
+    if (el.dataset.cursorBound) return;
+    el.dataset.cursorBound = '1';
+    const label = el.dataset.label;
+    el.addEventListener('mouseenter', () => {
+      cursor.classList.add('expand');
+      cursorRing.classList.add(label ? 'text' : 'expand');
+      if (label) {
+        cursorLabel.textContent = label;
+        cursorLabel.classList.add('show');
+      }
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.classList.remove('expand');
+      cursorRing.classList.remove('expand', 'text');
+      cursorLabel.classList.remove('show');
+    });
+  });
+}
+
+/* ============================================================
+   NAV / TICKER
+   ============================================================ */
+const nav = document.getElementById('nav');
+const ticker = document.getElementById('ticker');
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if (y > 60) nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+  if (y > 200) ticker.classList.add('hide');
+  else ticker.classList.remove('hide');
+
+  // scroll progress
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = max > 0 ? y / max : 0;
+  document.getElementById('progressBar').style.transform = `scaleX(${pct})`;
+
+  // 3D shirt scroll target
+  targetScrollProgress = pct;
+
+  lastScroll = y;
+});
+
+/* ============================================================
+   MOBILE MENU
+   ============================================================ */
+document.getElementById('menuToggle').addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.add('open');
+});
+document.getElementById('mobileClose').addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.remove('open');
+});
+document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.remove('open');
+}));
+
+/* ============================================================
+   CURRENCY
+   ============================================================ */
+function fmt(amount) {
+  const converted = Math.round(amount * currency.rate);
+  return currency.symbol + converted.toLocaleString();
+}
+document.getElementById('currency').addEventListener('click', (e) => {
+  if (e.target.tagName !== 'BUTTON') return;
+  document.querySelectorAll('#currency button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  const code = e.target.dataset.cur;
+  currency = {
+    code,
+    symbol: code === 'GBP' ? '£' : code === 'USD' ? '$' : '€',
+    rate: rates[code]
+  };
+  renderProducts();
+  updateCart();
+  if (activeProductId) updateModalPricing();
+});
+
+/* ============================================================
+   PRODUCTS
+   ============================================================ */
+function getFiltered() {
+  let arr = activeFilter === 'all' ? [...products] : products.filter(p => p.cat === activeFilter);
+  switch (activeSort) {
+    case 'new': arr.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)); break;
+    case 'price-low': arr.sort((a, b) => a.price - b.price); break;
+    case 'price-high': arr.sort((a, b) => b.price - a.price); break;
+    default: arr.sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+  return arr;
+}
+
+function renderProducts() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const list = getFiltered();
+  document.getElementById('count').textContent = String(list.length).padStart(2, '0');
+
+  list.forEach((p, i) => {
+    const tagHtml = p.tag === 'new' ? '<span class="product-tag new">New</span>' :
+                    p.tag === 'sale' ? '<span class="product-tag sale">−15%</span>' :
+                    p.tag === 'last' ? '<span class="product-tag last">Final pieces</span>' : '';
+    const swatchesHtml = p.colors.slice(0, 3).map(c => `<span class="color-swatch" style="background:${c};"></span>`).join('') +
+                        (p.colors.length > 3 ? `<span class="color-count">+${p.colors.length - 3}</span>` : '');
+    const oldPriceHtml = p.oldPrice ? `<span class="product-price-old">${fmt(p.oldPrice)}</span>` : '';
+    const isFav = favs.has(p.id);
+
+    const el = document.createElement('div');
+    el.className = 'product reveal';
+    el.dataset.id = p.id;
+    el.dataset.label = 'Quick view';
+    el.style.transitionDelay = `${(i % 3) * 80}ms`;
+    el.innerHTML = `
+      <div class="product-image">
+        <div class="product-tags">${tagHtml}</div>
+        <button class="product-fav ${isFav ? 'active' : ''}" data-fav="${p.id}" aria-label="Save">
+          <svg viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 21s-7-4.5-9.5-9c-2.5-4.5 1-9 5-9 2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 4 0 7.5 4.5 5 9C19 16.5 12 21 12 21z"/>
+          </svg>
+        </button>
+        <div class="product-image-bg" style="background:${p.grad};"></div>
+        <button class="product-quick" data-add="${p.id}">+ Add to bag</button>
+      </div>
+      <div class="product-meta">
+        <div>
+          <div class="product-cat"><span>${p.catLabel}</span><span class="ref">— ref. ${p.ref}</span></div>
+          <div class="product-name">${p.name} <em>${p.sub}</em></div>
+          <div class="product-fabric">${p.fabric}</div>
+          <div class="product-colors">${swatchesHtml}</div>
+        </div>
+        <div class="product-price">${oldPriceHtml}${fmt(p.price)}</div>
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+
+  // bind events
+  grid.querySelectorAll('.product').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('[data-add]') || e.target.closest('[data-fav]')) return;
+      openModal(parseInt(el.dataset.id));
+    });
+  });
+  grid.querySelectorAll('[data-add]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      addToCart(parseInt(b.dataset.add));
+    });
+  });
+  grid.querySelectorAll('[data-fav]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFav(parseInt(b.dataset.fav));
+    });
+  });
+  bindCursor(grid);
+  grid.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+
+/* ============================================================
+   FILTERS / SORT
+   ============================================================ */
+document.querySelectorAll('.filter-pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.filter-pill').forEach(o => o.classList.remove('active'));
+    p.classList.add('active');
+    activeFilter = p.dataset.filter;
+    renderProducts();
+  });
+});
+document.getElementById('sort').addEventListener('change', (e) => {
+  activeSort = e.target.value;
+  renderProducts();
+});
+
+/* ============================================================
+   FAVOURITES
+   ============================================================ */
+function toggleFav(id) {
+  if (favs.has(id)) {
+    favs.delete(id);
+    showToast('Removed from saved');
+  } else {
+    favs.add(id);
+    showToast('Saved');
+  }
+  renderProducts();
+}
+
+/* ============================================================
+   CART
+   ============================================================ */
+function addToCart(id, size = 'M') {
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+  const key = `${id}-${size}`;
+  const existing = cart.find(c => c.key === key);
+  if (existing) existing.qty++;
+  else cart.push({ ...product, qty: 1, size, key });
+  updateCart();
+  showToast(`${product.name} added`);
+  const cc = document.getElementById('cartCount');
+  cc.classList.add('bump');
+  setTimeout(() => cc.classList.remove('bump'), 350);
+}
+
+function removeFromCart(key) {
+  const i = cart.findIndex(c => c.key === key);
+  if (i >= 0) cart.splice(i, 1);
+  updateCart();
+}
+
+function updateQty(key, delta) {
+  const item = cart.find(c => c.key === key);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) removeFromCart(key);
+  else updateCart();
+}
+
+function updateCart() {
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  const cc = document.getElementById('cartCount');
+  cc.textContent = count;
+  document.getElementById('drawerCount').textContent = `${count} piece${count === 1 ? '' : 's'} · Free returns`;
+
+  const body = document.getElementById('drawerBody');
+  const footer = document.getElementById('drawerFooter');
+
+  if (cart.length === 0) {
+    body.innerHTML = `
+      <div class="drawer-empty">
+        <div class="drawer-empty-icon">∅</div>
+        <h4>Your bag is <em>empty.</em></h4>
+        <p>Pieces from the season will appear here when you add them.</p>
+        <button class="drawer-empty-cta" id="drawerCloseShop">Browse the season</button>
+      </div>
+    `;
+    footer.style.display = 'none';
+    document.getElementById('drawerCloseShop').addEventListener('click', closeDrawer);
+    bindCursor(body);
+    return;
+  }
+
+  footer.style.display = 'block';
+  body.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-img" style="background:${item.grad};"></div>
+      <div>
+        <div class="cart-item-name">${item.name} ${item.sub}</div>
+        <div class="cart-item-meta">${item.catLabel} · ${item.ref} · Size ${item.size}</div>
+        <div class="cart-qty">
+          <button data-qty="${item.key}" data-d="-1">−</button>
+          <span>${item.qty}</span>
+          <button data-qty="${item.key}" data-d="1">+</button>
+        </div>
+      </div>
+      <div class="cart-item-right">
+        <div class="cart-item-price">${fmt(item.price * item.qty)}</div>
+        <button class="cart-item-remove" data-rm="${item.key}">Remove</button>
+      </div>
+    </div>
+  `).join('');
+
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const vat = subtotal * 0.20;
+  document.getElementById('subtotal').textContent = fmt(subtotal);
+  document.getElementById('vat').textContent = fmt(vat);
+  document.getElementById('total').textContent = fmt(subtotal);
+
+  body.querySelectorAll('[data-qty]').forEach(b => {
+    b.addEventListener('click', () => updateQty(b.dataset.qty, parseInt(b.dataset.d)));
+  });
+  body.querySelectorAll('[data-rm]').forEach(b => {
+    b.addEventListener('click', () => removeFromCart(b.dataset.rm));
+  });
+  bindCursor(body);
+}
+
+document.getElementById('cartOpen').addEventListener('click', () => {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerBg').classList.add('open');
+});
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.getElementById('drawerBg').addEventListener('click', closeDrawer);
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerBg').classList.remove('open');
+}
+
+/* ============================================================
+   QUICK VIEW MODAL
+   ============================================================ */
+function openModal(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  activeProductId = id;
+  activeSize = 'M';
+
+  document.getElementById('modalImg').style.background = p.grad;
+  document.getElementById('modalCat').textContent = `${p.catLabel} · ref. ${p.ref}`;
+  document.getElementById('modalName').innerHTML = `${p.name} <em>${p.sub}</em>`;
+  document.getElementById('modalFabric').textContent = p.fabric;
+
+  const sizeGrid = document.getElementById('sizeGrid');
+  sizeGrid.innerHTML = sizes.map(s => {
+    const disabled = (s === 'XS' && p.id === 8) || (s === 'XL' && p.id === 4);
+    const selected = s === activeSize && !disabled;
+    return `<button class="size-btn ${selected ? 'selected' : ''}" data-size="${s}" ${disabled ? 'disabled' : ''}>${s}</button>`;
+  }).join('');
+  sizeGrid.querySelectorAll('.size-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.disabled) return;
+      sizeGrid.querySelectorAll('.size-btn').forEach(o => o.classList.remove('selected'));
+      b.classList.add('selected');
+      activeSize = b.dataset.size;
+    });
+  });
+
+  // fav button
+  const favBtn = document.getElementById('modalFav');
+  if (favs.has(id)) {
+    favBtn.style.borderColor = 'var(--rust)';
+    favBtn.style.color = 'var(--rust)';
+    favBtn.querySelector('svg').setAttribute('fill', 'currentColor');
+  } else {
+    favBtn.style.borderColor = '';
+    favBtn.style.color = '';
+    favBtn.querySelector('svg').setAttribute('fill', 'none');
+  }
+
+  updateModalPricing();
+  bindCursor(document.getElementById('modal'));
+
+  document.getElementById('modalBg').classList.add('open');
+  document.getElementById('modal').classList.add('open');
+}
+
+function updateModalPricing() {
+  const p = products.find(x => x.id === activeProductId);
+  if (!p) return;
+  document.getElementById('modalPrice').textContent = fmt(p.price);
+  document.getElementById('modalAdd').textContent = `Add to bag — ${fmt(p.price)}`;
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+  document.getElementById('modal').classList.remove('open');
+  activeProductId = null;
+}
+
+document.getElementById('modalBg').addEventListener('click', closeModal);
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalAdd').addEventListener('click', () => {
+  if (!activeProductId) return;
+  addToCart(activeProductId, activeSize);
+  closeModal();
+});
+document.getElementById('modalFav').addEventListener('click', () => {
+  if (!activeProductId) return;
+  toggleFav(activeProductId);
+  openModal(activeProductId); // refresh fav state
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeDrawer();
+  }
+});
+
+/* ============================================================
+   ACCORDION
+   ============================================================ */
+document.querySelectorAll('.accordion-trigger').forEach(t => {
+  t.addEventListener('click', () => {
+    const item = t.parentElement;
+    const content = item.querySelector('.accordion-content');
+    const isOpen = item.classList.contains('open');
+    // close all
+    document.querySelectorAll('.accordion-item').forEach(i => {
+      i.classList.remove('open');
+      i.querySelector('.accordion-content').style.maxHeight = '0';
+    });
+    if (!isOpen) {
+      item.classList.add('open');
+      content.style.maxHeight = content.scrollHeight + 'px';
+    }
+  });
+});
+// open first by default
+const firstAcc = document.querySelector('.accordion-item');
+if (firstAcc) {
+  firstAcc.classList.add('open');
+  firstAcc.querySelector('.accordion-content').style.maxHeight = firstAcc.querySelector('.accordion-content').scrollHeight + 'px';
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let toastTimer;
+function showToast(msg) {
+  document.getElementById('toastText').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ============================================================
+   REVEAL OBSERVER
+   ============================================================ */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* ============================================================
+   NEWSLETTER
+   ============================================================ */
+document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  showToast('Thank you — confirmation sent');
+  e.target.reset();
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderProducts();
+bindCursor();
+window.addEventListener('resize', onShirtResize);
+
+// init three.js after a tiny delay so dimensions settle
+setTimeout(() => {
+  if (typeof THREE !== 'undefined') initShirt();
+}, 100);
+
+// After accordion size changes (eg fonts loaded), recalc heights for the open one
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const open = document.querySelector('.accordion-item.open');
+    if (open) {
+      const c = open.querySelector('.accordion-content');
+      c.style.maxHeight = c.scrollHeight + 'px';
+    }
+  }, 300);
+});
+</script>
+
+</body>
+</html>

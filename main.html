@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MAISON NORÉ — Volume XII / A·W 26</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="cursor"></div>
+<div class="cursor-ring"></div>
+<div class="cursor-label" id="cursorLabel"></div>
+
+<div class="scroll-progress"><div class="scroll-progress-bar" id="progressBar"></div></div>
+
+<!-- ===== LOADER ===== -->
+<div class="loader" id="loader">
+  <div class="loader-mark">
+    <span>M</span><span>A</span><span>I</span><span>S</span><span>O</span><span>N</span>
+  </div>
+  <div class="loader-meta">
+    <strong>Volume XII · A·W 26</strong>
+    Cutting the season
+    <div class="loader-pct" id="loaderPct">00%</div>
+  </div>
+</div>
+
+<!-- ===== TICKER ===== -->
+<div class="ticker" id="ticker">
+  <div class="ticker-track">
+    <div class="ticker-item">Complimentary shipping over €250</div>
+    <div class="ticker-item">Volume XII releases 14 February</div>
+    <div class="ticker-item">Pieces cut & sewn in Italy and Portugal</div>
+    <div class="ticker-item">Atelier appointments — Paris · Tokyo · Milan</div>
+    <div class="ticker-item">Complimentary shipping over €250</div>
+    <div class="ticker-item">Volume XII releases 14 February</div>
+    <div class="ticker-item">Pieces cut & sewn in Italy and Portugal</div>
+    <div class="ticker-item">Atelier appointments — Paris · Tokyo · Milan</div>
+  </div>
+</div>
+
+<!-- ===== NAV ===== -->
+<nav id="nav">
+  <ul class="nav-links">
+    <li><a href="#shop">Shop <sup>12</sup></a></li>
+    <li><a href="#editorial">Lookbook</a></li>
+    <li><a href="#atelier">Atelier</a></li>
+    <li><a href="#journal">Journal</a></li>
+  </ul>
+  <a href="#" class="logo">MAISON <i>noré</i></a>
+  <div class="nav-actions">
+    <div class="currency-toggle" id="currency">
+      <button class="active" data-cur="EUR">€</button>
+      <button data-cur="GBP">£</button>
+      <button data-cur="USD">$</button>
+    </div>
+    <button>Search</button>
+    <button class="cart-btn" id="cartOpen">
+      Bag <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="menu-toggle" id="menuToggle">Menu</button>
+  </div>
+</nav>
+
+<!-- ===== MOBILE MENU ===== -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-top">
+    <span class="logo">MAISON <i>noré</i></span>
+    <button class="mobile-menu-close" id="mobileClose">Close ×</button>
+  </div>
+  <ul class="mobile-menu-links">
+    <li><a href="#shop" class="mobile-link">Shop <sup>01</sup></a></li>
+    <li><a href="#editorial" class="mobile-link">Lookbook <sup>02</sup></a></li>
+    <li><a href="#atelier" class="mobile-link">Atelier <sup>03</sup></a></li>
+    <li><a href="#journal" class="mobile-link">Journal <sup>04</sup></a></li>
+    <li><a href="#stockists" class="mobile-link">Stockists <sup>05</sup></a></li>
+  </ul>
+  <div class="mobile-menu-foot">
+    Paris · Tokyo · Milan<br>
+    +33 1 42 33 28 14<br>
+    studio@maison-nore.com
+  </div>
+</div>
+
+<!-- ===== HERO with 3D shirt ===== -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="shirt-canvas-wrap">
+    <canvas id="shirtCanvas"></canvas>
+  </div>
+  <div class="hero-text">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      Volume XII — Released 14·02·26
+    </div>
+    <h1 class="hero-title">
+      <div class="line"><span class="word">Quiet</span></div>
+      <div class="line"><span class="word italic">defiance,</span></div>
+      <div class="line"><span class="word">in cloth.</span></div>
+    </h1>
+    <div class="hero-meta">
+      <p class="hero-desc">Twelve garments forming the spine of a season — drawn from the granite coast of Brittany. Cut in small editions from cloth specified in our atelier.</p>
+      <a href="#shop" class="hero-cta">
+        <span>Enter the season</span>
+        <span class="hero-cta-arrow">[ → ]</span>
+      </a>
+    </div>
+  </div>
+  <div class="hero-side">
+    <div>
+      <strong>12<em>·</em>26</strong>
+      Pieces<br>this season
+    </div>
+    <div>
+      <strong><em>04</em></strong>
+      Drops<br>per year
+    </div>
+    <div>
+      <strong><em>£</em>180</strong>
+      Stockists<br>worldwide
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-hint-line"></div>
+    <span>Scroll to begin</span>
+  </div>
+</section>
+
+<!-- ===== SHOP ===== -->
+<section id="shop" class="container">
+  <div class="section-head">
+    <div>
+      <span class="section-num">001 · The Selection</span>
+      <h2 class="section-title">The <em class="accent">essentials,</em><br>volume <em>twelve.</em></h2>
+    </div>
+    <div></div>
+    <div class="section-aside">
+      <p class="section-desc">A studied collection of outerwear, knitwear, tailoring, and trouser. Each piece cut from cloth specified for our atelier — heavy melton, brushed cashmere, raw selvedge denim — and assembled in runs of fewer than three hundred.</p>
+    </div>
+  </div>
+
+  <div class="shop-controls">
+    <div class="filter-pills" id="filters">
+      <button class="filter-pill active" data-filter="all">All <span class="n">12</span></button>
+      <button class="filter-pill" data-filter="outerwear">Outerwear <span class="n">04</span></button>
+      <button class="filter-pill" data-filter="knitwear">Knitwear <span class="n">03</span></button>
+      <button class="filter-pill" data-filter="tailoring">Tailoring <span class="n">02</span></button>
+      <button class="filter-pill" data-filter="trousers">Trousers <span class="n">03</span></button>
+    </div>
+    <div class="filter-count"><em id="count">12</em> pieces shown</div>
+    <div class="sort">
+      <span>Sort</span>
+      <select id="sort">
+        <option value="featured">Featured</option>
+        <option value="new">Newest</option>
+        <option value="price-low">Price ↑</option>
+        <option value="price-high">Price ↓</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="product-grid" id="grid"></div>
+</section>
+
+<!-- ===== EDITORIAL ===== -->
+<section class="editorial" id="editorial">
+  <div class="container">
+    <div class="section-head" style="border-top:none; padding-top: 0;">
+      <div>
+        <span class="section-num">002 · Lookbook</span>
+        <h2 class="section-title">A <em class="accent">field</em><br>study, of sorts.</h2>
+      </div>
+      <div></div>
+      <div class="section-aside">
+        <span class="label">Photographed in</span>
+        <span class="value">Côte de Granit Rose</span>
+        <p class="section-desc" style="margin-top: 16px;">Photographed across the granite coast of Brittany over four mornings in November — early light, low fog, salted air, an unaccompanied walk.</p>
+      </div>
+    </div>
+    <div class="editorial-grid">
+      <div class="edit-card">
+        <div class="edit-bg" style="background:linear-gradient(135deg,#3a2e25 0%,#1a1611 100%);"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=1000&fit=crop" alt="The long walk" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+        <div class="edit-overlay"></div>
+        <div class="edit-meta"><span class="frame">Frame 01·12</span><span>Ploumanac'h</span></div>
+        <div class="edit-content">
+          <div class="edit-title">The long <em>walk.</em></div>
+          <div class="edit-loc">06:14 · Mont Blanc Overcoat</div>
+        </div>
+      </div>
+      <div class="edit-card">
+        <div class="edit-bg" style="background:linear-gradient(225deg,#5a4332 0%,#2a201a 100%);"><img src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&h=600&fit=crop" alt="Granite fog linen" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+        <div class="edit-overlay"></div>
+        <div class="edit-meta"><span class="frame">Frame 04·12</span><span>Trégastel</span></div>
+        <div class="edit-content">
+          <div class="edit-title">Granite, fog, <em>linen.</em></div>
+          <div class="edit-loc">07:42 · Salt &amp; Smoke Blazer</div>
+        </div>
+      </div>
+      <div class="edit-card">
+        <div class="edit-bg" style="background:linear-gradient(45deg,#1f1812 0%,#5a4332 100%);"><img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&h=1000&fit=crop" alt="Morning uncoupled" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+        <div class="edit-overlay"></div>
+        <div class="edit-meta"><span class="frame">Frame 07·12</span><span>Île-Grande</span></div>
+        <div class="edit-content">
+          <div class="edit-title">Morning, <em>uncoupled.</em></div>
+          <div class="edit-loc">08:11 · Hisae Cashmere</div>
+        </div>
+      </div>
+      <div class="edit-card">
+        <div class="edit-bg" style="background:linear-gradient(315deg,#2a201a 0%,#6a4d3a 100%);"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=800&fit=crop" alt="Studio still" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+        <div class="edit-overlay"></div>
+        <div class="edit-meta"><span class="frame">Frame 11·12</span><span>Atelier, Paris</span></div>
+        <div class="edit-content">
+          <div class="edit-title">Studio, <em>still.</em></div>
+          <div class="edit-loc">14:23 · Three-Piece Mk II</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BIG MARQUEE ===== -->
+<div class="big-marquee">
+  <div class="big-marquee-track">
+    <div class="big-marquee-item">Quiet defiance, <span class="accent">in cloth</span></div>
+    <div class="big-marquee-item">Made for <span class="accent">longevity</span></div>
+    <div class="big-marquee-item">Cut in <span class="accent">Italy</span> & Portugal</div>
+    <div class="big-marquee-item">Quiet defiance, <span class="accent">in cloth</span></div>
+    <div class="big-marquee-item">Made for <span class="accent">longevity</span></div>
+    <div class="big-marquee-item">Cut in <span class="accent">Italy</span> & Portugal</div>
+  </div>
+</div>
+
+<!-- ===== ATELIER / MAKERS ===== -->
+<section class="atelier container" id="atelier">
+  <div class="section-head">
+    <div>
+      <span class="section-num">003 · The Atelier</span>
+      <h2 class="section-title">Hands that <em>make</em><br>the work.</h2>
+    </div>
+    <div></div>
+    <div class="section-aside">
+      <span class="label">Studio est.</span>
+      <span class="value">Paris, 2014</span>
+    </div>
+  </div>
+
+  <div class="atelier-grid">
+    <ul class="atelier-list">
+      <li class="atelier-item">
+        <span class="num">01</span>
+        <span class="name">Élise <em>Noré</em></span>
+        <span class="role">Founder / Director</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">02</span>
+        <span class="name">Marco <em>Brunelli</em></span>
+        <span class="role">Master Tailor · Biella</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">03</span>
+        <span class="name">Hisae <em>Tanaka</em></span>
+        <span class="role">Natural Dyer · Kyoto</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">04</span>
+        <span class="name">Joaquim <em>Salgado</em></span>
+        <span class="role">Knitwear · Vila do Conde</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">05</span>
+        <span class="name">Fabienne <em>Crozier</em></span>
+        <span class="role">Pattern Cutter · Paris</span>
+      </li>
+      <li class="atelier-item">
+        <span class="num">06</span>
+        <span class="name">Yuki <em>Miyazawa</em></span>
+        <span class="role">Indigo Dye Studio · Tokushima</span>
+      </li>
+    </ul>
+
+    <div class="atelier-quote">
+      We refuse to design at speed. A coat we ship this autumn was first sketched in 2023 — patterned in 2024, prototyped through five fittings, then cut. The slow part is the point.
+      <div class="atelier-quote-attr">Élise Noré, Founder, Spring 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FABRIC SPECS ACCORDION ===== -->
+<section class="specs">
+  <div class="container">
+    <div class="section-head" style="border-top:none; padding-top: 0;">
+      <div>
+        <span class="section-num">004 · The Cloth</span>
+        <h2 class="section-title">A <em class="accent">specification,</em><br>in detail.</h2>
+      </div>
+      <div></div>
+      <div class="section-aside">
+        <p class="section-desc">Featured fabric of the season, from the Brunelli mill outside Biella, woven in lots of fewer than two hundred metres.</p>
+      </div>
+    </div>
+
+    <div class="specs-grid">
+      <div class="specs-visual">
+        <div class="specs-visual-name">Melton<br><em>—</em> Brunelli 04·N</div>
+        <div class="specs-visual-label">Magnified · 28×</div>
+        <div class="specs-visual-stats">
+          <strong>680gsm</strong><br>
+          90% Wool<br>
+          10% Cashmere<br>
+          Boiled finish
+        </div>
+      </div>
+
+      <div>
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span class="accordion-num">01</span>
+            <span class="accordion-title"><em>Fibre</em> & origin</span>
+            <span class="accordion-icon"></span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p>A blend of merino wool sourced from the Vermandois region of northern France and grade-A cashmere from Inner Mongolia, sorted by hand at our partner mill in Biella.</p>
+              <p>Both fibres are spun to a 2/30Nm count, plied, and woven on Vandewiele looms dating to the 1970s — slow, careful, and impossible to rush.</p>
+              <ul>
+                <li><span>Wool origin</span><span>Vermandois, FR</span></li>
+                <li><span>Cashmere origin</span><span>Inner Mongolia</span></li>
+                <li><span>Spinner</span><span>Filatura di Pollone</span></li>
+                <li><span>Mill</span><span>Brunelli, Biella</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span class="accordion-num">02</span>
+            <span class="accordion-title">Construction <em>&amp; weave</em></span>
+            <span class="accordion-icon"></span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p>Boiled and milled over forty-four hours to achieve a tight, dense hand. The cloth is wind-resistant without lining, weather-tolerant without coating, and warmer than its weight suggests.</p>
+              <ul>
+                <li><span>Weight</span><span>680 gsm</span></li>
+                <li><span>Width</span><span>148 cm</span></li>
+                <li><span>Weave</span><span>2/2 twill, milled</span></li>
+                <li><span>Finish</span><span>Boiled, brushed, raised</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span class="accordion-num">03</span>
+            <span class="accordion-title">Wear <em>&amp; care</em></span>
+            <span class="accordion-icon"></span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p>The cloth softens with wear and improves with age — the brushed surface developing a patina of gentle felting around the cuffs and shoulders within the first season. Air after wearing; brush in the direction of the nap; dry-clean only when necessary, and never more than once a season.</p>
+              <p>Damage to the cloth is repairable indefinitely through our complimentary atelier service. Send the garment, and we return it.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span class="accordion-num">04</span>
+            <span class="accordion-title">Provenance <em>&amp; certification</em></span>
+            <span class="accordion-icon"></span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p>Every metre carries a traceable lot number recorded against fibre source, dye batch, and weave date. Our supply chain is audited annually by an independent consultancy specialising in slow-fashion provenance.</p>
+              <ul>
+                <li><span>Standard</span><span>RWS · GCS</span></li>
+                <li><span>Audit</span><span>Slowmark, Paris</span></li>
+                <li><span>Lot traceability</span><span>Full chain</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== JOURNAL ===== -->
+<section class="journal container" id="journal">
+  <div class="section-head" style="padding-top: 0; border-top: none;">
+    <div>
+      <span class="section-num">005 · Journal</span>
+      <h2 class="section-title">Notes from <em>the studio.</em></h2>
+    </div>
+    <div></div>
+    <div class="section-aside">
+      <span class="label">Last published</span>
+      <span class="value">14 February</span>
+    </div>
+  </div>
+  <div class="journal-grid">
+    <article class="journal-card reveal">
+      <div class="journal-img"><div class="journal-img-bg" style="background:linear-gradient(135deg,#3a2e25,#1a1611);"><img src="https://images.unsplash.com/photo-1558171814-77492607ba5f?w=600&h=450&fit=crop" alt="Brunelli mill" style="width:100%;height:100%;object-fit:cover;display:block;"></div></div>
+      <div class="journal-meta"><span class="cat">On Craft</span><span>·</span><span>11 Feb 2026</span><span>·</span><span>8 min</span></div>
+      <h3 class="journal-title">The Brunelli mill, in late winter</h3>
+      <p class="journal-excerpt">Where our cloth is woven. A visit with Marco — third-generation owner of a hundred-year mill — who still rejects forty per cent of what arrives at his loading dock.</p>
+      <span class="journal-read">Read essay [ → ]</span>
+    </article>
+    <article class="journal-card reveal">
+      <div class="journal-img"><div class="journal-img-bg" style="background:linear-gradient(225deg,#4a3528,#2a201a);"><img src="https://images.unsplash.com/photo-1524230572899-a752b3835840?w=600&h=450&fit=crop" alt="Hisae Tanaka" style="width:100%;height:100%;object-fit:cover;display:block;"></div></div>
+      <div class="journal-meta"><span class="cat">In Conversation</span><span>·</span><span>04 Feb 2026</span><span>·</span><span>12 min</span></div>
+      <h3 class="journal-title">Hisae Tanaka, on patience</h3>
+      <p class="journal-excerpt">Walnut, indigo, oak gall. A long conversation with our natural dyer in her Kyoto studio about pigment, time, and the discipline required to coax colour from leaves.</p>
+      <span class="journal-read">Read interview [ → ]</span>
+    </article>
+    <article class="journal-card reveal">
+      <div class="journal-img"><div class="journal-img-bg" style="background:linear-gradient(45deg,#1a1611,#5a4332);"><img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&h=450&fit=crop" alt="Cutting a coat" style="width:100%;height:100%;object-fit:cover;display:block;"></div></div>
+      <div class="journal-meta"><span class="cat">Process</span><span>·</span><span>22 Jan 2026</span><span>·</span><span>6 min</span></div>
+      <h3 class="journal-title">On the cutting of a coat</h3>
+      <p class="journal-excerpt">Eighteen panels, six fittings, one master cutter. A short film on how our overcoats are made — and a candid argument for why it ought to take a season.</p>
+      <span class="journal-read">Watch film [ → ]</span>
+    </article>
+  </div>
+</section>
+
+<!-- ===== STOCKISTS ===== -->
+<section class="stockists" id="stockists">
+  <div class="container">
+    <div class="section-head" style="padding-top: 0; border-top: none;">
+      <div>
+        <span class="section-num">006 · Stockists</span>
+        <h2 class="section-title">Where to <em>find us.</em></h2>
+      </div>
+      <div></div>
+      <div class="section-aside">
+        <span class="label">Currently</span>
+        <span class="value">180+ stockists</span>
+      </div>
+    </div>
+    <div class="stockist-grid">
+      <div class="stockist">
+        <div class="city">Paris</div>
+        <div class="country">France · 75003</div>
+        <div class="name">Maison Noré · Atelier &amp; Showroom</div>
+        <div class="addr">14 rue de Saintonge<br>By appointment</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Tokyo</div>
+        <div class="country">Japan · 150-0001</div>
+        <div class="name">Studio Aoyama</div>
+        <div class="addr">3-12-8 Jingūmae<br>Shibuya-ku</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Milan</div>
+        <div class="country">Italy · 20121</div>
+        <div class="name">Galleria Brera</div>
+        <div class="addr">Via Solferino 24<br>Mon — Sat</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">London</div>
+        <div class="country">UK · W1S</div>
+        <div class="name">Mortimer House</div>
+        <div class="addr">37 Mortimer Street<br>Members &amp; guests</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Copenhagen</div>
+        <div class="country">Denmark · 1051</div>
+        <div class="name">Storm</div>
+        <div class="addr">Store Regnegade 1<br>Mon — Sat</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">New York</div>
+        <div class="country">USA · 10013</div>
+        <div class="name">Project No. 8</div>
+        <div class="addr">38 Orchard Street<br>By appointment</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Seoul</div>
+        <div class="country">South Korea · 04420</div>
+        <div class="name">Buoy Hannam</div>
+        <div class="addr">Hannam-dong 683-5<br>Tue — Sun</div>
+        <span class="arrow">↗</span>
+      </div>
+      <div class="stockist">
+        <div class="city">Berlin</div>
+        <div class="country">Germany · 10178</div>
+        <div class="name">Andreas Murkudis</div>
+        <div class="addr">Potsdamer Straße 81e<br>Mon — Sat</div>
+        <span class="arrow">↗</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NEWSLETTER ===== -->
+<section class="newsletter">
+  <div class="newsletter-content">
+    <div class="newsletter-eyebrow">007 · Correspondence</div>
+    <h2 class="newsletter-title">Letters, <em>occasionally.</em></h2>
+    <p class="newsletter-desc">No noise — four dispatches a year. Release announcements, studio films, the rare archival sale, and an occasional essay we've been working through. Addressed to you first.</p>
+    <form class="newsletter-form" id="newsletterForm">
+      <input type="email" class="newsletter-input" placeholder="your address" required>
+      <button type="submit" class="newsletter-btn">Subscribe [→]</button>
+    </form>
+    <div class="newsletter-foot">No third-party sharing · Unsubscribe at any time</div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-mark">Maison <em>noré.</em></div>
+  <div class="footer-cols">
+    <div class="footer-col">
+      <h4>The House</h4>
+      <p class="footer-about">Founded in Paris in 2014. Slow, considered garments cut from cloth specified for our atelier — for those who notice the difference. Made in Italy and Portugal.</p>
+      <div class="footer-cert">
+        <span>RWS Certified</span>
+        <span>GCS Audited</span>
+        <span>B Corp 2024</span>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <ul>
+        <li><a href="#">All Pieces</a></li>
+        <li><a href="#">Outerwear</a></li>
+        <li><a href="#">Knitwear</a></li>
+        <li><a href="#">Tailoring</a></li>
+        <li><a href="#">Trouser</a></li>
+        <li><a href="#">Archive Sale</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>House</h4>
+      <ul>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">The Atelier</a></li>
+        <li><a href="#">Stockists</a></li>
+        <li><a href="#">Press Room</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Repair Service</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Service</h4>
+      <ul>
+        <li><a href="#">Contact Atelier</a></li>
+        <li><a href="#">Shipping &amp; Returns</a></li>
+        <li><a href="#">Care Guide</a></li>
+        <li><a href="#">Fit &amp; Sizing</a></li>
+        <li><a href="#">Made-to-Measure</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© MMXXVI Maison Noré · 14 rue de Saintonge, Paris 75003</span>
+    <span>Volume XII · A·W 26</span>
+    <span><a href="#">Instagram</a> · <a href="#">Substack</a> · <a href="#">Pinterest</a></span>
+  </div>
+</footer>
+
+<!-- ===== CART DRAWER ===== -->
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div>
+      <h3 class="drawer-title">The <em>bag</em></h3>
+      <span class="drawer-title-meta" id="drawerCount">0 pieces · Free returns</span>
+    </div>
+    <button class="drawer-close" id="drawerClose">Close ×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer" id="drawerFooter" style="display:none;">
+    <div class="drawer-row"><span>Subtotal</span><span id="subtotal">€0</span></div>
+    <div class="drawer-row"><span>Shipping</span><span>Calculated at checkout</span></div>
+    <div class="drawer-row"><span>VAT (incl.)</span><span id="vat">€0</span></div>
+    <div class="drawer-row total"><span>Total</span><span class="total-num" id="total">€0</span></div>
+    <button class="drawer-checkout">
+      <span>Proceed to checkout</span>
+      <span>[→]</span>
+    </button>
+    <div class="drawer-trust">Secure · Stripe · Shop Pay · Klarna</div>
+  </div>
+</aside>
+
+<!-- ===== QUICK VIEW MODAL ===== -->
+<div class="modal-bg" id="modalBg"></div>
+<div class="modal" id="modal">
+  <button class="modal-close" id="modalClose">×</button>
+  <div class="modal-img" id="modalImg"></div>
+  <div class="modal-content">
+    <span class="modal-cat" id="modalCat">Outerwear · ref. 04·N</span>
+    <h2 class="modal-name" id="modalName">Mont Blanc Overcoat</h2>
+    <span class="modal-fabric" id="modalFabric">680gsm wool & cashmere melton — Brunelli, Biella</span>
+    <div class="modal-price" id="modalPrice">€1,240</div>
+    <p class="modal-desc" id="modalDesc">A long, double-breasted overcoat with peaked lapels and a half-canvas chest. Cut on the bias for shape without padding, hand-finished at the buttonholes, and lined in cupro for slip and weight. Designed to soften from year one and to be repaired indefinitely.</p>
+
+    <div class="modal-section">
+      <div class="modal-section-label">Select Size · UK</div>
+      <div class="size-grid" id="sizeGrid"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-add" id="modalAdd">Add to bag — €1,240</button>
+      <button class="modal-fav-btn" id="modalFav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 21s-7-4.5-9.5-9c-2.5-4.5 1-9 5-9 2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3 4 0 7.5 4.5 5 9C19 16.5 12 21 12 21z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toastText">Added to bag</span>
+</div>
+
+<script src="script.js"></script>
+
+
+</body>
+</html>
